@@ -62,7 +62,6 @@ void ofApp::update() {
 		imgMat = ofxCv::toCv(imgOut);
 		cv::cvtColor(imgMat, imgMat, CV_RGB2Lab);
 		imgOut.update();
-
 		input = ofxTF2::pixelsToTensor(imgOut.getPixels().getChannel(0));
 		input = cppflow::expand_dims(input, 0);
 		input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 256, 256 }), true);
