@@ -16,7 +16,7 @@ void ofApp::setup() {
 	model.setup({ "serving_default_input_1" }, { "StatefulPartitionedCall" });
 
 #ifdef USE_VIDEO
-	videoPlayer.load("Godard.mp4");
+	videoPlayer.load("Frenzy.mp4");
 	imgOut.allocate(videoPlayer.getWidth(), videoPlayer.getHeight(), OF_IMAGE_COLOR);
 	width = videoPlayer.getWidth();
 	height = videoPlayer.getHeight();
@@ -32,8 +32,8 @@ void ofApp::setup() {
 	}
 	cv::cvtColor(imgMat, imgMat, CV_RGB2Lab);
 	imgIn.update();
+
 	input = ofxTF2::pixelsToTensor(imgIn.getPixels().getChannel(0));
-	input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
 	input = cppflow::expand_dims(input, 0);
 	input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 256, 256 }), true);
 
@@ -58,6 +58,7 @@ void ofApp::update() {
 		pixels = videoPlayer.getPixelsRef();
 		imgMat = ofxCv::toCv(pixels);
 		cv::cvtColor(imgMat, imgMat, CV_RGB2Lab);
+
 		input = ofxTF2::pixelsToTensor(pixels.getChannel(0));
 		input = cppflow::expand_dims(input, 0);
 		input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 256, 256 }), true);
