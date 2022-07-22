@@ -16,7 +16,7 @@ void ofApp::setup() {
 	model.setup({ "serving_default_input_1" }, { "StatefulPartitionedCall" });
 
 #ifdef USE_VIDEO
-	videoPlayer.load("Frenzy.mp4");
+	videoPlayer.load("Godard.mp4");
 	imgOut.allocate(videoPlayer.getWidth(), videoPlayer.getHeight(), OF_IMAGE_COLOR);
 	width = videoPlayer.getWidth();
 	height = videoPlayer.getHeight();
