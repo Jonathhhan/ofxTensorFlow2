@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
 #include "ofxCv.h"
-#define USE_VIDEO
+// #define USE_VIDEO
 
 class ofApp : public ofBaseApp {
 
