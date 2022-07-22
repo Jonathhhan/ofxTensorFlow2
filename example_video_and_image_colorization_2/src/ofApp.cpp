@@ -55,14 +55,10 @@ void ofApp::update() {
 #ifdef USE_VIDEO
 	videoPlayer.update();
 	if (videoPlayer.isFrameNew()) {
-		input = ofxTF2::pixelsToTensor(videoPlayer.getPixels());
-		input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
-		input = cppflow::div(input, cppflow::tensor({ 255.f }));
-		ofxTF2::tensorToImage(input, imgOut);
-		imgMat = ofxCv::toCv(imgOut);
+		pixels = videoPlayer.getPixelsRef();
+		imgMat = ofxCv::toCv(pixels);
 		cv::cvtColor(imgMat, imgMat, CV_RGB2Lab);
-		imgOut.update();
-		input = ofxTF2::pixelsToTensor(imgOut.getPixels().getChannel(0));
+		input = ofxTF2::pixelsToTensor(pixels.getChannel(0));
 		input = cppflow::expand_dims(input, 0);
 		input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 256, 256 }), true);
 

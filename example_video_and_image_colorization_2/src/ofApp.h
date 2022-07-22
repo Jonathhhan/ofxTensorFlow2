@@ -3,7 +3,6 @@
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
 #include "ofxCv.h"
-
 #define USE_VIDEO
 
 class ofApp : public ofBaseApp {
@@ -33,6 +32,7 @@ public:
 
 #ifdef USE_VIDEO
 	ofVideoPlayer videoPlayer;
+	ofFloatPixels pixels;
 #else
 	ofFloatImage imgIn;
 #endif
