@@ -14,13 +14,12 @@ void ofApp::setup() {
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
 		ofLogError() << "failed to set GPU Memory options!";
 	}
-	// load first model, bail out on error
+
 	if (!model.load("model")) {
 		std::exit(EXIT_FAILURE);
 	}
 	model.setup({ {"serving_default_placeholder"} ,{"serving_default_placeholder_1"} },  {"StatefulPartitionedCall"} );
 
-	// load style image
 	style = cppflow::decode_jpeg(cppflow::read_file(std::string(ofToDataPath("wave.jpg"))));
 	style = cppflow::expand_dims(style, 0);
 	style = cppflow::resize_bicubic(style, cppflow::tensor({ 256, 256 }), true);
