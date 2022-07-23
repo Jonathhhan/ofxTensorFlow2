@@ -6,6 +6,7 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 	ofSetWindowTitle("example_style_transfer_arbitrary");
 
+	videoPlayer.setUseTexture(false);
 	videoPlayer.load("Frenzy.mp4");
 	videoPlayer.play();
 	imgOut.allocate(480, 360, OF_IMAGE_COLOR);
@@ -24,7 +25,7 @@ void ofApp::setup() {
 	style = cppflow::expand_dims(style, 0);
 	style = cppflow::resize_bicubic(style, cppflow::tensor({ 256, 256 }), true);
 	style = cppflow::cast(style, TF_UINT8, TF_FLOAT);
-	style = cppflow::mul(style, cppflow::tensor({ 1.0f / 255.f }));
+	style = cppflow::div(style, cppflow::tensor({ 255.f }));
 	inputVector = { style, style };
 }
 
@@ -32,7 +33,7 @@ void ofApp::setup() {
 void ofApp::update() {
 	videoPlayer.update();
 	if (videoPlayer.isFrameNew()) {
-		videoPlayer.getTexture().readToPixels(floatPixels);
+		floatPixels = videoPlayer.getPixelsRef();
 		input = ofxTF2::pixelsToTensor(floatPixels);
 		input = cppflow::expand_dims(input, 0);
 		input = cppflow::resize_bicubic(input, cppflow::tensor({ 360, 480 }), true);
