@@ -56,11 +56,11 @@ void ofApp::update() {
 #ifdef USE_VIDEO
 	videoPlayer.update();
 	if (videoPlayer.isFrameNew()) {
-		pixels = videoPlayer.getPixelsRef();
-		imgMat = ofxCv::toCv(pixels);
+		floatPixels = videoPlayer.getPixelsRef();
+		imgMat = ofxCv::toCv(floatPixels);
 		cv::cvtColor(imgMat, imgMat, CV_RGB2Lab);
 
-		input = ofxTF2::pixelsToTensor(pixels.getChannel(0));
+		input = ofxTF2::pixelsToTensor(floatPixels.getChannel(0));
 		input = cppflow::expand_dims(input, 0);
 		input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 256, 256 }), true);
 
