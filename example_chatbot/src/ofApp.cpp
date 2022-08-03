@@ -41,6 +41,7 @@ void ofApp::draw() {
 }
 
 void ofApp::onTextChange(std::string& text) {
+	// ofLogNotice() << "text changed " << text;
 	if (model.isLoaded()) {
 		int maxElementIndex = 0;
 		std::list<int> encoded_words_1 = textEncoder.encode(text);
@@ -84,6 +85,7 @@ void ofApp::onTextChange(std::string& text) {
 		std::list<int> encoded_words_2(tempVector_1.begin(), tempVector_1.end());
 		decoded_answer = textEncoder.decode(encoded_words_2);
 		ofStringReplace(decoded_answer, "_", " ");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex(" +"), " ");
 		std::cout << "Decoded answer: " << decoded_answer << std::endl;
 		std::cout << "Encoded answer: ";
 		for (auto& word : encoded_words_2) {
