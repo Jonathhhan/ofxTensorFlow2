@@ -5,13 +5,16 @@ tokenizers::SubwordTextEncoder textEncoder("data/tokenizer.tf");
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetWindowTitle("example_chatbot");
-	ofSetBackgroundColor(200);
+	ofSetBackgroundColor(150, 200, 200);
 
 	_textParameter.addListener(this, &ofApp::onTextChange);
 	_parameters.setName("Type something:");
 	_parameters.add(_textParameter.set("text", "default"));
-	_gui.setDefaultWidth(400);
+	_gui.setTextColor(240);
+	_gui.setDefaultTextColor(240);
+	_gui.setDefaultWidth(500);
 	_gui.setup(_parameters);
+	_gui.setPosition(350, 50);
 
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
 		ofLogError() << "failed to set GPU Memory options!";
@@ -35,7 +38,7 @@ void ofApp::update() {
 void ofApp::draw() {
 	ofSetColor(20);
 	ofDrawRectangle(20, 170, 1160, 100);
-	ofSetColor(200);
+	ofSetColor(240);
 	ofDrawBitmapString("You: " + decoded_question, 50, 200);
 	ofDrawBitmapString("The bot: " + decoded_answer, 50, 250);
 	_gui.draw();
