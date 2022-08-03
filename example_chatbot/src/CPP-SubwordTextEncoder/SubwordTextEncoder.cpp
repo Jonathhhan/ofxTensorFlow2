@@ -96,6 +96,7 @@ std::list<std::string> SubwordTextEncoder::word_tokenize(const std::string& text
     line = std::regex_replace(line, std::regex("n'"), "ng");
     line = std::regex_replace(line, std::regex("'bout"), "about");
     line = std::regex_replace(line, std::regex("[^a-z?.!,]+"), " ");
+    line = line + " ";
     return SubwordTextEncoder::_split(" ", std::move(space_punctuation(line)));
 }
 
