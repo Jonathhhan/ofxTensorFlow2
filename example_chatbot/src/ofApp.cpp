@@ -41,7 +41,6 @@ void ofApp::draw() {
 }
 
 void ofApp::onTextChange(std::string& text) {
-	// ofLogNotice() << "text changed " << text;
 	if (model.isLoaded()) {
 		int maxElementIndex = 0;
 		std::list<int> encoded_words_1 = textEncoder.encode(text);
