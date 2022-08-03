@@ -69,7 +69,6 @@ std::string SubwordTextEncoder::space_punctuation(const std::string& s) {
     string = std::regex_replace(string, std::regex(" "), "_ ");
     string = std::regex_replace(string, std::regex("([a-z])([?.!,])"), "$1 -$2");
     string = std::regex_replace(string, std::regex("([?.!,])([a-z])"), "$1- $2");
-    std::cout << string << std::endl;
     return string;
 }
 
