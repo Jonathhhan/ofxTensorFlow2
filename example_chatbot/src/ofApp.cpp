@@ -58,10 +58,9 @@ void ofApp::onTextChange(std::string& text) {
 			if (maxElementIndex == textEncoder.get_vocab_size() + 258) {
 				break;
 			}
-			std::vector<cppflow::tensor> vett = { input_1, input_2 };
-			std::vector<cppflow::tensor> output;
-			output = model.runMultiModel(vett);
-			ofxTF2::tensorToVector(output[0], tempVector_1);
+			std::vector<cppflow::tensor> vectorOfInputTensors = { input_1, input_2 };
+			std::vector<cppflow::tensor> vectorOfOutputTensors = model.runMultiModel(vectorOfInputTensors);
+			ofxTF2::tensorToVector(vectorOfOutputTensors[0], tempVector_1);
 			vector<float> tempVector_2(tempVector_1.begin() + 16459 * i, tempVector_1.end());
 			maxElementIndex = std::max_element(tempVector_2.begin(), tempVector_2.end()) - tempVector_2.begin();
 			ofxTF2::tensorToVector(input_2, tempVector_1);
