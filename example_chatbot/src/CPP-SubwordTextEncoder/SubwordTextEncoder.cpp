@@ -62,14 +62,14 @@ std::map<std::string, int> SubwordTextEncoder::_word_counts(const std::list<std:
 }
 
 std::string SubwordTextEncoder::space_punctuation(const std::string& s) {
-    std::string string = std::regex_replace(s, std::regex("\\. +"), ".");
-    string = std::regex_replace(string, std::regex(", +"), ",");
-    string = std::regex_replace(string, std::regex("! +"), "!");
-    string = std::regex_replace(string, std::regex("\\? +"), "?");
-    //std::string string = std::regex_replace(s, std::regex("(\s*[?.!,])"), "$2");
+    std::string string = std::regex_replace(s, std::regex(" *\\. *"), ".");
+    string = std::regex_replace(string, std::regex(" *, *"), ",");
+    string = std::regex_replace(string, std::regex(" *! *"), "!");
+    string = std::regex_replace(string, std::regex(" *\\? *"), "?");
     string = std::regex_replace(string, std::regex(" "), "_ ");
     string = std::regex_replace(string, std::regex("([a-z])([?.!,])"), "$1 -$2");
     string = std::regex_replace(string, std::regex("([?.!,])([a-z])"), "$1- $2");
+    std::cout << string << std::endl;
     return string;
 }
 
@@ -96,7 +96,7 @@ std::list<std::string> SubwordTextEncoder::word_tokenize(const std::string& text
     line = std::regex_replace(line, std::regex("n'g"), "ng");
     line = std::regex_replace(line, std::regex("n'"), "ng");
     line = std::regex_replace(line, std::regex("'bout"), "about");
-    line = std::regex_replace(line, std::regex("[^a-zA-Z?.!,]+"), " ");
+    line = std::regex_replace(line, std::regex("[^a-z?.!,]+"), " ");
     return SubwordTextEncoder::_split(" ", std::move(space_punctuation(line)));
 }
 
