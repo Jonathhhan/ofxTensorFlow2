@@ -20,7 +20,6 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 	model.setup({ "serving_default_inputs", "serving_default_dec_inputs" }, { "StatefulPartitionedCall" });
-	model.printOperations();
 
 	vocabSize = textEncoder.get_vocab_size();
 	std::cout << "Size of vocabulary " << vocabSize << std::endl;
