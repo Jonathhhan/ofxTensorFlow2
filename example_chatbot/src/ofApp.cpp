@@ -5,6 +5,7 @@ tokenizers::SubwordTextEncoder textEncoder("data/tokenizer.tf");
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetWindowTitle("example_chatbot");
+	ofSetBackgroundColor(200);
 
 	_textParameter.addListener(this, &ofApp::onTextChange);
 	_parameters.setName("Type something:");
@@ -35,8 +36,8 @@ void ofApp::draw() {
 	ofSetColor(20);
 	ofDrawRectangle(20, 170, 1160, 100);
 	ofSetColor(200);
-	ofDrawBitmapString("Question: " + decoded_question, 50, 200);
-	ofDrawBitmapString("Answer: " + decoded_answer, 50, 250);
+	ofDrawBitmapString("You: " + decoded_question, 50, 200);
+	ofDrawBitmapString("The bot: " + decoded_answer, 50, 250);
 	_gui.draw();
 }
 
@@ -71,6 +72,11 @@ void ofApp::onTextChange(std::string& text) {
 
 		decoded_question = textEncoder.decode(encoded_words_1);
 		ofStringReplace(decoded_question, "_", " ");
+		decoded_question = std::regex_replace(decoded_question, std::regex(" +"), " ");
+		decoded_question = std::regex_replace(decoded_question, std::regex(" *\\."), ".");
+		decoded_question = std::regex_replace(decoded_question, std::regex(" *,"), ",");
+		decoded_question = std::regex_replace(decoded_question, std::regex(" *!"), "!");
+		decoded_question = std::regex_replace(decoded_question, std::regex(" *\\?"), "?");
 		std::cout << "Decoded question: " << decoded_question << std::endl;
 		std::cout << "Encoded question: ";
 		for (auto& word : encoded_words_1) {
@@ -85,6 +91,10 @@ void ofApp::onTextChange(std::string& text) {
 		decoded_answer = textEncoder.decode(encoded_words_2);
 		ofStringReplace(decoded_answer, "_", " ");
 		decoded_answer = std::regex_replace(decoded_answer, std::regex(" +"), " ");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *\\."), ".");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *,"), ",");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *!"), "!");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *\\?"), "?");
 		std::cout << "Decoded answer: " << decoded_answer << std::endl;
 		std::cout << "Encoded answer: ";
 		for (auto& word : encoded_words_2) {
