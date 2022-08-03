@@ -32,12 +32,12 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	_gui.draw();
 	ofSetColor(20);
 	ofDrawRectangle(20, 170, 1160, 100);
 	ofSetColor(200);
 	ofDrawBitmapString("Question: " + decoded_question, 50, 200);
 	ofDrawBitmapString("Answer: " + decoded_answer, 50, 250);
+	_gui.draw();
 }
 
 void ofApp::onTextChange(std::string& text) {
