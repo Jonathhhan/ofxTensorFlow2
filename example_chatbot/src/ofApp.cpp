@@ -20,6 +20,7 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 	model.setup({ "serving_default_inputs", "serving_default_dec_inputs" }, { "StatefulPartitionedCall" });
+	model.printOperations();
 
 	vocabSize = textEncoder.get_vocab_size();
 	std::cout << "Size of vocabulary " << vocabSize << std::endl;
@@ -41,28 +42,27 @@ void ofApp::draw() {
 }
 
 void ofApp::onTextChange(std::string& text) {
-	// ofLogNotice() << "text changed " << text;
 	if (model.isLoaded()) {
 		int maxElementIndex = 0;
 		std::list<int> encoded_words_1 = textEncoder.encode(text);
 		std::vector<float> tempVector_1(encoded_words_1.begin(), encoded_words_1.end());
-		tempVector_1.insert(tempVector_1.begin(), vocabSize + 256);
-		tempVector_1.push_back(vocabSize + 257);
+		tempVector_1.insert(tempVector_1.begin(), vocabSize + 257);
+		tempVector_1.push_back(vocabSize + 258);
 		cppflow::tensor input_1 = ofxTF2::vectorToTensor(tempVector_1);
-		cppflow::tensor input_2 = cppflow::tensor({ vocabSize + 256 });
+		cppflow::tensor input_2 = cppflow::tensor({ vocabSize + 257 });
 		input_1 = cppflow::expand_dims(input_1, 0);
 		input_2 = cppflow::expand_dims(input_2, 0);
 		input_1 = cppflow::cast(input_1, TF_INT32, TF_FLOAT);
 		input_2 = cppflow::cast(input_2, TF_INT32, TF_FLOAT);
 		for (int i = 0; i < 40; i++) {
-			if (maxElementIndex == textEncoder.get_vocab_size() + 257) {
+			if (maxElementIndex == textEncoder.get_vocab_size() + 258) {
 				break;
 			}
 			std::vector<cppflow::tensor> vett = { input_1, input_2 };
 			std::vector<cppflow::tensor> output;
 			output = model.runMultiModel(vett);
 			ofxTF2::tensorToVector(output[0], tempVector_1);
-			vector<float> tempVector_2(tempVector_1.begin() + 8278 * i, tempVector_1.end());
+			vector<float> tempVector_2(tempVector_1.begin() + 16459 * i, tempVector_1.end());
 			maxElementIndex = std::max_element(tempVector_2.begin(), tempVector_2.end()) - tempVector_2.begin();
 			ofxTF2::tensorToVector(input_2, tempVector_1);
 			tempVector_1.push_back((float)maxElementIndex);
