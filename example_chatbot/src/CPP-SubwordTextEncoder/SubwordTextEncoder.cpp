@@ -227,7 +227,6 @@ std::list<int> SubwordTextEncoder::encode(const std::string& sentence) {
     std::list<int> out;
     std::list<std::string> tokenized_word = SubwordTextEncoder::word_tokenize(sentence);
     for (auto& item: tokenized_word) {
-        std::cout << item << std::endl;
         if (_subword_to_id.find(item) != _subword_to_id.end()) out.push_back(_subword_to_id[item]);
         else {
             for (auto &byte: _byte_encode(item)) {
