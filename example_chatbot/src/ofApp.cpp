@@ -8,8 +8,8 @@ void ofApp::setup() {
 	ofSetBackgroundColor(150, 200, 200);
 
 	_textParameter.addListener(this, &ofApp::onTextChange);
-	_parameters.setName("Type something:");
-	_parameters.add(_textParameter.set("text", "default"));
+	_parameters.setName("Text panel");
+	_parameters.add(_textParameter.set("Type something", "Default"));
 	_gui.setTextColor(240);
 	_gui.setDefaultTextColor(240);
 	_gui.setDefaultWidth(500);
