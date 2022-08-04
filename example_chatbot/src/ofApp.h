@@ -27,7 +27,8 @@ class ofApp : public ofBaseApp {
 		void onTextChange(std::string& text);
 
 		ofxTF2::Model model;
-		ofxPanel _gui;
+	
+		ofxGuiGroup _gui;
 		ofParameterGroup _parameters;
 		ofParameter<std::string> _textParameter;
 		ofEventListener _textParameterListener;
