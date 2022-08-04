@@ -210,7 +210,6 @@ void SubwordTextEncoder::write_lines(const std::string& filename_prefix) {
     else SubwordFile << METADATA_PREFIX << "{}";
     for (const auto& item: vocabulary) {
         SubwordFile << "'" << item << "'" << "\n";
-        // std::cout << "'" << item << "'" << std::endl;
     }
     SubwordFile.close();
 }
