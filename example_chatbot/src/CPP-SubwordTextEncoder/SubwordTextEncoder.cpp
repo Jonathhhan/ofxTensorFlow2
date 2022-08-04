@@ -120,7 +120,6 @@ std::list<std::string> SubwordTextEncoder::_split(const std::string &delimiter, 
             while (std::regex_search(token, re)) {
                 token = std::regex_replace(token, re, "$1 $2");
             }
-            if(token.length()>1)
             values.push_back(token);
             s.erase(0, pos + delimiter.length());
         }
@@ -229,10 +228,12 @@ std::list<int> SubwordTextEncoder::encode(const std::string& sentence) {
     std::list<int> out;
     std::list<std::string> tokenized_word = SubwordTextEncoder::word_tokenize(sentence);
     for (auto& item: tokenized_word) {
+        std::cout << item << std::endl;
         if (_subword_to_id.find(item) != _subword_to_id.end()) out.push_back(_subword_to_id[item]);
         else {
             for (auto &byte: _byte_encode(item)) {
                 out.push_back(byte);
+                
             }
         }
     }
