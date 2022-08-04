@@ -127,7 +127,6 @@ std::list<std::string> SubwordTextEncoder::_split(const std::string &delimiter, 
         while (std::regex_search(st, re)) {
             st = std::regex_replace(st, re, "$1 $2");
         }
-        if (token.length() > 1)
         values.push_back(st);
         return values;
 }
