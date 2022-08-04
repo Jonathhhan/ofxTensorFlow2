@@ -24,6 +24,7 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 	model.setup({ "serving_default_inputs", "serving_default_dec_inputs" }, { "StatefulPartitionedCall" });
+	// model.printOperations();
 
 	vocabSize = textEncoder.get_vocab_size();
 	std::cout << "Size of vocabulary " << vocabSize << std::endl;
@@ -64,7 +65,10 @@ void ofApp::onTextChange(std::string& text) {
 			std::vector<cppflow::tensor> vectorOfInputTensors = { input_1, input_2 };
 			std::vector<cppflow::tensor> vectorOfOutputTensors = model.runMultiModel(vectorOfInputTensors);
 			ofxTF2::tensorToVector(vectorOfOutputTensors[0], tempVector_1);
-			vector<float> tempVector_2(tempVector_1.begin() + 16459 * i, tempVector_1.end());
+			ofxTF2::tensorToVector(vectorOfOutputTensors[0], tempVector_1);
+			vector<int> tempVector_3;
+			ofxTF2::tensorToVector(vectorOfOutputTensors[0].shape(), tempVector_3);
+			vector<float> tempVector_2(tempVector_1.begin() + tempVector_3[2] * i, tempVector_1.end());
 			maxElementIndex = std::max_element(tempVector_2.begin(), tempVector_2.end()) - tempVector_2.begin();
 			ofxTF2::tensorToVector(input_2, tempVector_1);
 			tempVector_1.push_back((float)maxElementIndex);
