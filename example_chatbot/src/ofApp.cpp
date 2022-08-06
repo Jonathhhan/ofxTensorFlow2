@@ -81,7 +81,7 @@ void ofApp::onTextChange(std::string& text) {
 		decoded_question = std::regex_replace(decoded_question, std::regex("\\s+"), " ");
 		decoded_question = std::regex_replace(decoded_question, std::regex("\\s([,.!?])"), "$1");
 		std::cout << "Decoded question: " << decoded_question << std::endl;
-		std::cout << "Encoded question: " << ofToString(input_vector) << endl;
+		std::cout << "Encoded question: " << ofToString(input_vector) << std::endl;
 
 		output_vector.pop_back();
 		output_vector.erase(output_vector.begin());
@@ -90,7 +90,7 @@ void ofApp::onTextChange(std::string& text) {
 		decoded_answer = std::regex_replace(decoded_answer, std::regex("\\s+"), " ");
 		decoded_answer = std::regex_replace(decoded_answer, std::regex("\\s([,.!?])"), "$1");
 		std::cout << "Decoded answer: " << decoded_answer << std::endl;
-		std::cout << "Encoded answer: " << ofToString(output_vector) << endl;
+		std::cout << "Encoded answer: " << ofToString(output_vector) << std::endl;
 	}
 }
 
