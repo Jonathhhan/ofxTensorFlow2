@@ -62,11 +62,8 @@ std::map<std::string, int> SubwordTextEncoder::_word_counts(const std::list<std:
 }
 
 std::string SubwordTextEncoder::space_punctuation(const std::string& s) {
-    std::string string = std::regex_replace(s, std::regex(" *\\. *"), ".");
-    string = std::regex_replace(string, std::regex(" *, *"), ",");
-    string = std::regex_replace(string, std::regex(" *! *"), "!");
-    string = std::regex_replace(string, std::regex(" *\\? *"), "?");
-    string = std::regex_replace(string, std::regex(" "), "_ ");
+    std::string string = std::regex_replace(s, std::regex("\\s*([.,!?])\\s*"), "$1");
+    string = std::regex_replace(string, std::regex("\\s"), "_ ");
     string = std::regex_replace(string, std::regex("([a-z])([?.!,])"), "$1 -$2");
     string = std::regex_replace(string, std::regex("([?.!,])([a-z])"), "$1- $2");
     return string;
@@ -222,7 +219,7 @@ std::list<int> SubwordTextEncoder::_byte_encode(const std::string& token) const 
     return out;
 }
 
-std::list<int> SubwordTextEncoder::encode(const std::string& sentence) {
+std::vector<int> SubwordTextEncoder::encode(const std::string& sentence) {
     std::list<int> out;
     std::list<std::string> tokenized_word = SubwordTextEncoder::word_tokenize(sentence);
     for (auto& item: tokenized_word) {
@@ -251,13 +248,13 @@ std::string SubwordTextEncoder::_id_to_subword(int id) {
     }
 }
 
-std::list<int> SubwordTextEncoder::_pad_incr(const std::list<int>& ids) {
-    std::list<int> out;
+std::vector<int> SubwordTextEncoder::_pad_incr(const std::list<int>& ids) {
+    std::vector<int> out;
     for (auto& item: ids) {out.push_back(item+1);}
     return out;
 }
 
-std::string SubwordTextEncoder::decode(const std::list<int>& sentence_encoded) {
+std::string SubwordTextEncoder::decode(const std::vector<int>& sentence_encoded) {
     std::string out;
     for (auto& id: sentence_encoded) {
         out += SubwordTextEncoder::_id_to_subword(id - 1);

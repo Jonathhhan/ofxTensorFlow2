@@ -30,7 +30,7 @@ namespace tokenizers {
 
         static std::string space_punctuation(const std::string &s);
 
-        static std::list<int> _pad_incr(const std::list<int> &ids);
+        static std::vector<int> _pad_incr(const std::list<int> &ids);
 
         static std::list<std::list<std::string>> _chunk_corpus(std::list<std::string> list, unsigned int n);
 
@@ -67,8 +67,8 @@ namespace tokenizers {
 
         static std::string filename(const std::string &filename_prefix) { return filename_prefix + ".subwords"; };
 
-        std::list<int> encode(const std::string &sentence);
+        std::vector<int> encode(const std::string &sentence);
 
-        std::string decode(const std::list<int> &sentence_encoded);
+        std::string decode(const std::vector<int> &sentence_encoded);
     };
 }
