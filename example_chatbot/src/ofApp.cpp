@@ -24,7 +24,6 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 	model.setup({ "serving_default_inputs", "serving_default_dec_inputs" }, { "StatefulPartitionedCall" });
-	// model.printOperations();
 
 	vocabSize = textEncoder.get_vocab_size();
 	std::cout << "Size of vocabulary " << vocabSize << std::endl;
@@ -48,65 +47,50 @@ void ofApp::draw() {
 void ofApp::onTextChange(std::string& text) {
 	if (model.isLoaded()) {
 		int maxElementIndex = 0;
-		std::list<int> encoded_words_1 = textEncoder.encode(text);
-		std::vector<float> tempVector_1(encoded_words_1.begin(), encoded_words_1.end());
-		tempVector_1.insert(tempVector_1.begin(), vocabSize + 257);
-		tempVector_1.push_back(vocabSize + 258);
-		cppflow::tensor input_1 = ofxTF2::vectorToTensor(tempVector_1);
-		cppflow::tensor input_2 = cppflow::tensor({ vocabSize + 257 });
+		std::vector<int> input_vector = textEncoder.encode(text);
+		input_vector.insert(input_vector.begin(), vocabSize + 257);
+		input_vector.push_back(vocabSize + 258);
+		cppflow::tensor input_1 = ofxTF2::vectorToTensor(input_vector);
 		input_1 = cppflow::expand_dims(input_1, 0);
-		input_2 = cppflow::expand_dims(input_2, 0);
 		input_1 = cppflow::cast(input_1, TF_INT32, TF_FLOAT);
+		std::vector<int> output_vector = { vocabSize + 257 };
+		cppflow::tensor input_2 = ofxTF2::vectorToTensor(output_vector);
+		input_2 = cppflow::expand_dims(input_2, 0);
 		input_2 = cppflow::cast(input_2, TF_INT32, TF_FLOAT);
+
 		for (int i = 0; i < 40; i++) {
 			if (maxElementIndex == textEncoder.get_vocab_size() + 258) {
 				break;
 			}
 			std::vector<cppflow::tensor> vectorOfInputTensors = { input_1, input_2 };
 			std::vector<cppflow::tensor> vectorOfOutputTensors = model.runMultiModel(vectorOfInputTensors);
-			ofxTF2::tensorToVector(vectorOfOutputTensors[0], tempVector_1);
-			ofxTF2::tensorToVector(vectorOfOutputTensors[0], tempVector_1);
-			vector<int> tempVector_3;
-			ofxTF2::tensorToVector(vectorOfOutputTensors[0].shape(), tempVector_3);
-			vector<float> tempVector_2(tempVector_1.begin() + tempVector_3[2] * i, tempVector_1.end());
-			maxElementIndex = std::max_element(tempVector_2.begin(), tempVector_2.end()) - tempVector_2.begin();
-			ofxTF2::tensorToVector(input_2, tempVector_1);
-			tempVector_1.push_back((float)maxElementIndex);
-			input_2 = ofxTF2::vectorToTensor(tempVector_1);
+			vectorOfOutputTensors[0] = cppflow::slice(vectorOfOutputTensors[0], cppflow::tensor({ 0, i, 0 }), cppflow::tensor({ 1, 1, -1 }), cppflow::datatype(TF_FLOAT));
+			cppflow::tensor max = cppflow::arg_max(vectorOfOutputTensors[0], 2);
+			maxElementIndex = max.get_data<int64_t>()[0];
+			output_vector.push_back(maxElementIndex);
+			input_2 = ofxTF2::vectorToTensor(output_vector);
+			input_2 = cppflow::cast(input_2, TF_INT32, TF_FLOAT);
 			input_2 = cppflow::expand_dims(input_2, 0);
 		}
 
-		decoded_question = textEncoder.decode(encoded_words_1);
+		input_vector.pop_back();
+		input_vector.erase(input_vector.begin());
+		decoded_question = textEncoder.decode(input_vector);
 		ofStringReplace(decoded_question, "_", " ");
-		decoded_question = std::regex_replace(decoded_question, std::regex(" +"), " ");
-		decoded_question = std::regex_replace(decoded_question, std::regex(" *\\."), ".");
-		decoded_question = std::regex_replace(decoded_question, std::regex(" *,"), ",");
-		decoded_question = std::regex_replace(decoded_question, std::regex(" *!"), "!");
-		decoded_question = std::regex_replace(decoded_question, std::regex(" *\\?"), "?");
+		ofStringReplace(decoded_question, "_", " ");
+		decoded_question = std::regex_replace(decoded_question, std::regex("\\s+"), " ");
+		decoded_question = std::regex_replace(decoded_question, std::regex("\\s([,.!?])"), "$1");
 		std::cout << "Decoded question: " << decoded_question << std::endl;
-		std::cout << "Encoded question: ";
-		for (auto& word : encoded_words_1) {
-			std::cout << word << " ";
-		}
-		std::cout << endl;
+		std::cout << "Encoded question: " << ofToString(input_vector) << endl;
 
-		ofxTF2::tensorToVector(input_2, tempVector_1);
-		tempVector_1.pop_back();
-		tempVector_1.erase(tempVector_1.begin());
-		std::list<int> encoded_words_2(tempVector_1.begin(), tempVector_1.end());
-		decoded_answer = textEncoder.decode(encoded_words_2);
+		output_vector.pop_back();
+		output_vector.erase(output_vector.begin());
+		decoded_answer = textEncoder.decode(output_vector);
 		ofStringReplace(decoded_answer, "_", " ");
-		decoded_answer = std::regex_replace(decoded_answer, std::regex(" +"), " ");
-		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *\\."), ".");
-		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *,"), ",");
-		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *!"), "!");
-		decoded_answer = std::regex_replace(decoded_answer, std::regex(" *\\?"), "?");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex("\\s+"), " ");
+		decoded_answer = std::regex_replace(decoded_answer, std::regex("\\s([,.!?])"), "$1");
 		std::cout << "Decoded answer: " << decoded_answer << std::endl;
-		std::cout << "Encoded answer: ";
-		for (auto& word : encoded_words_2) {
-			std::cout << word << " ";
-		}
-		std::cout << endl;
+		std::cout << "Encoded answer: " << ofToString(output_vector) << endl;
 	}
 }
 
