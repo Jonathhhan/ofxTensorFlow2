@@ -63,7 +63,7 @@ std::map<std::string, int> SubwordTextEncoder::_word_counts(const std::list<std:
 
 std::string SubwordTextEncoder::space_punctuation(const std::string& s) {
     std::string string = std::regex_replace(s, std::regex("\\s*([.,!?])\\s*"), "$1");
-    string = std::regex_replace(string, std::regex(" "), "_ ");
+    string = std::regex_replace(string, std::regex("\\s"), "_ ");
     string = std::regex_replace(string, std::regex("([a-z])([?.!,])"), "$1 -$2");
     string = std::regex_replace(string, std::regex("([?.!,])([a-z])"), "$1- $2");
     return string;
