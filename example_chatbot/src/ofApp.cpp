@@ -77,7 +77,6 @@ void ofApp::onTextChange(std::string& text) {
 		input_vector.erase(input_vector.begin());
 		decoded_question = textEncoder.decode(input_vector);
 		ofStringReplace(decoded_question, "_", " ");
-		ofStringReplace(decoded_question, "_", " ");
 		decoded_question = std::regex_replace(decoded_question, std::regex("\\s+"), " ");
 		decoded_question = std::regex_replace(decoded_question, std::regex("\\s([,.!?])"), "$1");
 		std::cout << "Decoded question: " << decoded_question << std::endl;
