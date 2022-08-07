@@ -139,14 +139,14 @@ std::string ofApp::chatbot(std::string str) {
 				break;
 			}
 			std::vector<cppflow::tensor> vectorOfInputTensors = { input_1, input_2 };
-			std::vector<cppflow::tensor> vectorOfOutputTensors = bot.runMultiModel(vectorOfInputTensors);
+			std::vector<cppflow::tensor> vectorOfOutputTensors = model.runMultiModel(vectorOfInputTensors);
 			vectorOfOutputTensors[0] = cppflow::slice(vectorOfOutputTensors[0], cppflow::tensor({ 0, i, 0 }), cppflow::tensor({ 1, 1, -1 }), cppflow::datatype(TF_FLOAT));
 			cppflow::tensor max = cppflow::arg_max(vectorOfOutputTensors[0], 2);
 			maxElementIndex = max.get_data<int64_t>()[0];
 			output_vector.push_back(maxElementIndex);
-			input_2 = ofxTF2::vectorToTensor(output_vector);
+			max = cppflow::cast(max, TF_INT32, TF_FLOAT);
+			input_2 = cppflow::concat(1, { input_2, max });
 			input_2 = cppflow::cast(input_2, TF_INT32, TF_FLOAT);
-			input_2 = cppflow::expand_dims(input_2, 0);
 		}
 
 		output_vector.pop_back();
