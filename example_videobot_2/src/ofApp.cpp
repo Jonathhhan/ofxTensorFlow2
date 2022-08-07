@@ -153,7 +153,6 @@ std::string ofApp::chatbot(std::string str) {
 		ofStringReplace(decoded_answer, "_", " ");
 		decoded_answer = std::regex_replace(decoded_answer, std::regex("\\s+"), " ");
 		decoded_answer = std::regex_replace(decoded_answer, std::regex("\\s([+.!?])"), "$1");
-
 		return decoded_answer;
 }
 
