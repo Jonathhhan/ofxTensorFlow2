@@ -56,10 +56,9 @@ void ofApp::update() {
 	videoPlayer.update();
 	if ((float)currentSubNo + currentSubLenght < sub.size() && sub[currentSubNo - 1. + currentSubLenght]->getEndTime() + ((sub[currentSubNo + currentSubLenght]->getStartTime() - sub[currentSubNo - 1. + currentSubLenght]->getEndTime()) / 2.) < videoPlayer.getPosition() * videoPlayer.getDuration() * 1000 ||  videoPlayer.getIsMovieDone()) {
 		std::vector<float> cosine;
-		for (int x = 0; x < vector_sub_copy.size(); x++) {
-			cppflow::tensor nextVector2 = nextVector * std::get<0>(vector_sub_copy[x]);
-			cppflow::tensor sum = cppflow::sum(nextVector2, cppflow::tensor({ 1 }));
-			cosine.push_back(sum.get_data<float>()[0]);
+		for (auto& element : vector_sub_copy) {
+			cppflow::tensor cosine_similarity = cppflow::sum(nextVector * std::get<0>(element), cppflow::tensor({ 1 }));
+			cosine.push_back(cosine_similarity.get_data<float>()[0]);
 		}
 		cppflow::tensor cosine_tensor = ofxTF2::vectorToTensor(cosine);
 		cppflow::tensor max = cppflow::arg_max(cosine_tensor, 0);
@@ -97,10 +96,9 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	std::vector<float> cosine;
-	for (int x = 0; x < vector_sub_copy.size(); x++) {
-		cppflow::tensor nextVector2 = nextVector * std::get<0>(vector_sub_copy[x]);
-		cppflow::tensor sum = cppflow::sum(nextVector2, cppflow::tensor({ 1 }));
-		cosine.push_back(sum.get_data<float>()[0]);
+	for (auto& element : vector_sub_copy) {
+		cppflow::tensor cosine_similarity = cppflow::sum(nextVector * std::get<0>(element), cppflow::tensor({ 1 }));
+		cosine.push_back(cosine_similarity.get_data<float>()[0]);
 	}
 	cppflow::tensor cosine_tensor = ofxTF2::vectorToTensor(cosine);
 	cppflow::tensor max = cppflow::arg_max(cosine_tensor, 0);
