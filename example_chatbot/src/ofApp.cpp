@@ -68,9 +68,9 @@ void ofApp::onTextChange(std::string& text) {
 			cppflow::tensor max = cppflow::arg_max(vectorOfOutputTensors[0], 2);
 			maxElementIndex = max.get_data<int64_t>()[0];
 			output_vector.push_back(maxElementIndex);
-			input_2 = ofxTF2::vectorToTensor(output_vector);
+			max = cppflow::cast(max, TF_INT32, TF_FLOAT);
+			input_2 = cppflow::concat(1, { input_2, max });
 			input_2 = cppflow::cast(input_2, TF_INT32, TF_FLOAT);
-			input_2 = cppflow::expand_dims(input_2, 0);
 		}
 
 		input_vector.pop_back();
