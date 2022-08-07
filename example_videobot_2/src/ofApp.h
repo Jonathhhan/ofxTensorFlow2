@@ -29,9 +29,9 @@ class ofApp : public ofBaseApp {
 		ofxTF2::Model model;
 		ofxTF2::Model bot;
 		std::vector<SubtitleItem*> sub;
-		std::vector<std::tuple<std::vector<double>, int, int, std::vector<double>>> vector_sub;
-		std::vector<std::tuple<std::vector<double>, int, int, std::vector<double>>> vector_sub_copy;
-		std::vector<double> nextVector;
+		std::vector<std::tuple<cppflow::tensor, int, int, cppflow::tensor>> vector_sub;
+		std::vector<std::tuple<cppflow::tensor, int, int, cppflow::tensor>> vector_sub_copy;
+		cppflow::tensor nextVector;
 		int currentSubNo;
 		int currentSubLenght;
 		std::string currentString;

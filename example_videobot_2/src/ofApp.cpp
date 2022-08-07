@@ -4,8 +4,6 @@ tokenizers::SubwordTextEncoder textEncoder("data/tokenizer.tf");
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-	std::vector<double> vec_1;
-	std::vector<double> vec_2;
 	std::vector<std::string> dialogue;
 	int counter = -1;
 
@@ -38,10 +36,8 @@ void ofApp::setup() {
 			std::string currentDialogue = ofJoinString(dialogue, " ");
 			dialogue.clear();
 			cppflow::tensor output_1 = model.runModel(cppflow::reshape(cppflow::tensor(currentDialogue), { -1 }));
-			ofxTF2::tensorToVector(output_1, vec_1);
 			cppflow::tensor output_2 = model.runModel(cppflow::reshape(cppflow::tensor(chatbot(currentDialogue)), { -1 }));
-			ofxTF2::tensorToVector(output_2, vec_2);
-			vector_sub.push_back(std::make_tuple(vec_1, element->getSubNo() - counter, counter, vec_2));
+			vector_sub.push_back(std::make_tuple(output_1, element->getSubNo() - counter, counter, output_2));
 			counter = -1;
 		}
 		counter++;
@@ -59,20 +55,20 @@ void ofApp::setup() {
 void ofApp::update() {
 	videoPlayer.update();
 	if (currentSubNo + currentSubLenght < sub.size() && sub[currentSubNo - 1. + currentSubLenght]->getEndTime() + ((sub[currentSubNo + currentSubLenght]->getStartTime() - sub[currentSubNo - 1. + currentSubLenght]->getEndTime()) / 2.) < videoPlayer.getPosition() * videoPlayer.getDuration() * 1000 ||  videoPlayer.getIsMovieDone()) {
-		std::vector<double> cosine;
+		std::vector<float> cosine;
 		for (int x = 0; x < vector_sub_copy.size(); x++) {
 			double cosine_similarity = 0;
-			for (int i = 0; i < std::get<0>(vector_sub_copy[x]).size(); i++) {
-				cosine_similarity += nextVector[i] * std::get<0>(vector_sub_copy[x])[i];
-			}
-			cosine.push_back(cosine_similarity);
+			cppflow::tensor nextVector2 = nextVector * std::get<0>(vector_sub_copy[x]);
+			cppflow::tensor sum = cppflow::sum(nextVector2, cppflow::tensor({ 1 }));
+			sum = cppflow::cast(sum, TF_INT32, TF_FLOAT);
+			cosine.push_back(sum.get_data<float>()[0]);
 		}
 		int maxElementIndex = std::max_element(cosine.begin(), cosine.end()) - cosine.begin();
 		double maxElement = *std::max_element(cosine.begin(), cosine.end());
 		currentSubNo = std::get<1>(vector_sub_copy[maxElementIndex]);
 		currentSubLenght = std::get<2>(vector_sub_copy[maxElementIndex]);
 		nextVector = std::get<3>(vector_sub_copy[maxElementIndex]);
-		show = "Subtitle: " + ofToString(currentSubNo) + " - " + ofToString(currentSubNo + currentSubLenght) + ".\n\nCosine similarity: " + ofToString(maxElement) + ".\n\nSubtitles left: " + ofToString(vector_sub_copy.size() - 1) + ".";
+		show = "Subtitle: " + ofToString(currentSubNo) + " - " + ofToString(currentSubNo + currentSubLenght) + "\n\nCosine similarity: " + ofToString(maxElement) + "\n\nSubtitles left: " + ofToString(vector_sub_copy.size() - 1);
 		vector_sub_copy.erase(vector_sub_copy.begin() + maxElementIndex);
 		if (vector_sub_copy.size() < 1) {
 			vector_sub_copy = vector_sub;
@@ -100,20 +96,20 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	std::vector<double> cosine;
+	std::vector<float> cosine;
 	for (int x = 0; x < vector_sub_copy.size(); x++) {
 		double cosine_similarity = 0;
-		for (int i = 0; i < std::get<0>(vector_sub_copy[x]).size(); i++) {
-			cosine_similarity += nextVector[i] * std::get<0>(vector_sub_copy[x])[i];
-		}
-		cosine.push_back(cosine_similarity);
+		cppflow::tensor nextVector2 = nextVector * std::get<0>(vector_sub_copy[x]);
+		cppflow::tensor sum = cppflow::sum(nextVector2, cppflow::tensor({ 1 }));
+		sum = cppflow::cast(sum, TF_INT32, TF_FLOAT);
+		cosine.push_back(sum.get_data<float>()[0]);
 	}
 	int maxElementIndex = std::max_element(cosine.begin(), cosine.end()) - cosine.begin();
 	double maxElement = *std::max_element(cosine.begin(), cosine.end());
 	currentSubNo = std::get<1>(vector_sub_copy[maxElementIndex]);
 	currentSubLenght = std::get<2>(vector_sub_copy[maxElementIndex]);
 	nextVector = std::get<3>(vector_sub_copy[maxElementIndex]);
-	show = "Subtitle: " + ofToString(currentSubNo) + " - " + ofToString(currentSubNo + currentSubLenght) + ".\n\nCosine similarity: " + ofToString(maxElement) + ".\n\nSubtitles left: " + ofToString(vector_sub_copy.size() - 1) + ".";
+	show = "Subtitle: " + ofToString(currentSubNo) + " - " + ofToString(currentSubNo + currentSubLenght) + "\n\nCosine similarity: " + ofToString(maxElement) + "\n\nSubtitles left: " + ofToString(vector_sub_copy.size() - 1);
 	vector_sub_copy.erase(vector_sub_copy.begin() + maxElementIndex);
 	if (vector_sub_copy.size() < 1) {
 		vector_sub_copy = vector_sub;
