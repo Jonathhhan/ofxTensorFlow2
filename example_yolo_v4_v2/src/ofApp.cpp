@@ -9,7 +9,7 @@ void ofApp::setup() {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 	ofSetWindowTitle("example_yolo_v4");
-	ofNoFill();
+	imgIn2.allocate(480, 360, OF_IMAGE_COLOR);
 	
 
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
@@ -23,7 +23,6 @@ void ofApp::setup() {
 
 #ifdef USE_VIDEO
 	videoPlayer.load("Frenzy.mp4");
-	imgIn2.allocate(videoPlayer.getWidth(), videoPlayer.getHeight(), OF_IMAGE_COLOR);
 	videoPlayer.play();
 #else
 	maxElementVector.clear();
@@ -31,7 +30,6 @@ void ofApp::setup() {
 	boundings.clear();
 	rectangleIndex.clear();
 	imgIn.load("eisenstein.jpg");
-	imgIn2.allocate(imgIn.getWidth(), imgIn.getHeight(), OF_IMAGE_COLOR);
 	input = ofxTF2::imageToTensor(imgIn);
 	input = cppflow::expand_dims(input, 0);
 	input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
@@ -66,6 +64,7 @@ void ofApp::setup() {
 	cppflow::tensor te5 = cppflow::tensor({ 1.0, 0.2, 0.0 });
 	te5 = cppflow::expand_dims(te5, 0);
 	te5 = cppflow::cast(te5, TF_UINT8, TF_FLOAT);
+	input = cppflow::resize_bicubic(input, cppflow::tensor({ 360, 480 }), true);
 	input = cppflow::draw_bounding_boxes_v2(input, te4, te5);
 	ofxTF2::tensorToImage(input, imgIn2);
 	imgIn2.update();
@@ -115,6 +114,7 @@ void ofApp::update() {
 		cppflow::tensor te5 = cppflow::tensor({ 1.0, 0.2, 0.0 });
 		te5 = cppflow::expand_dims(te5, 0);
 		te5 = cppflow::cast(te5, TF_UINT8, TF_FLOAT);
+		input = cppflow::resize_bicubic(input, cppflow::tensor({ 360, 480 }), true);
 		input = cppflow::draw_bounding_boxes_v2(input, te4, te5);
 		ofxTF2::tensorToImage(input, imgIn2);
 		imgIn2.update();
