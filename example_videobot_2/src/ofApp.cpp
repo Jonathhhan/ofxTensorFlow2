@@ -138,8 +138,7 @@ std::string ofApp::chatbot(std::string str) {
 			if (maxElementIndex == textEncoder.get_vocab_size() + 258) {
 				break;
 			}
-			std::vector<cppflow::tensor> vectorOfInputTensors = { input_1, input_2 };
-			std::vector<cppflow::tensor> vectorOfOutputTensors = bot.runMultiModel(vectorOfInputTensors);
+			std::vector<cppflow::tensor> vectorOfOutputTensors = bot.runMultiModel({ input_1, input_2 });
 			vectorOfOutputTensors[0] = cppflow::slice(vectorOfOutputTensors[0], cppflow::tensor({ 0, i, 0 }), cppflow::tensor({ 1, 1, -1 }), cppflow::datatype(TF_FLOAT));
 			cppflow::tensor max = cppflow::arg_max(vectorOfOutputTensors[0], 2);
 			maxElementIndex = max.get_data<int64_t>()[0];
