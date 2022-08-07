@@ -53,7 +53,7 @@ void ofApp::setup() {
 		float maxElement = newVecId[maxElementIndex];
 		maxElementIndexVector.push_back(maxElementIndex);
 		maxElementVector.push_back(maxElement);
-}
+	}
 	cppflow::tensor te1 = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
 	cppflow::tensor te2 = ofxTF2::vectorToTensor(maxElementVector);
 	cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10, 0.5);
