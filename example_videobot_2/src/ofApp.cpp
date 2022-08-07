@@ -20,7 +20,7 @@ void ofApp::setup() {
 	if (!model.load("model")) {
 		std::exit(EXIT_FAILURE);
 	}
-	model.setup({ {"serving_default_inputs:0"} }, { {"StatefulPartitionedCall_1:0"} });
+	model.setup({ "serving_default_inputs:0" }, { "StatefulPartitionedCall_1:0" });
 
 	if (!bot.load("save_model")) {
 		std::exit(EXIT_FAILURE);
