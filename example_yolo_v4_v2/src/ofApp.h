@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
 
-// #define USE_VIDEO
+#define USE_VIDEO
 
 class ofApp : public ofBaseApp {
 
@@ -44,4 +44,6 @@ public:
 	std::vector<int> maxElementIndexVector;
 	std::vector<std::vector<float>> boundings;
 	std::vector<int> rectangleIndex;
+
+	ofFloatImage imgIn2;
 };

@@ -10,6 +10,7 @@ void ofApp::setup() {
 	ofSetVerticalSync(true);
 	ofSetWindowTitle("example_yolo_v4");
 	ofNoFill();
+	
 
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
 		ofLogError() << "failed to set GPU Memory options!";
@@ -22,6 +23,7 @@ void ofApp::setup() {
 
 #ifdef USE_VIDEO
 	videoPlayer.load("Frenzy.mp4");
+	imgIn2.allocate(videoPlayer.getWidth(), videoPlayer.getHeight(), OF_IMAGE_COLOR);
 	videoPlayer.play();
 #else
 	maxElementVector.clear();
@@ -29,6 +31,7 @@ void ofApp::setup() {
 	boundings.clear();
 	rectangleIndex.clear();
 	imgIn.load("eisenstein.jpg");
+	imgIn2.allocate(imgIn.getWidth(), imgIn.getHeight(), OF_IMAGE_COLOR);
 	input = ofxTF2::imageToTensor(imgIn);
 	input = cppflow::expand_dims(input, 0);
 	input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
@@ -55,8 +58,17 @@ void ofApp::setup() {
 }
 	cppflow::tensor te1 = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
 	cppflow::tensor te2 = ofxTF2::vectorToTensor(maxElementVector);
-	cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10);
+	cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10, 0.5);
 	ofxTF2::tensorToVector(te3, rectangleIndex);
+	cppflow::tensor te4 = cppflow::gather(te1, te3, TF_FLOAT, TF_FLOAT);
+	te4 = cppflow::expand_dims(te4, 0);
+	te4 = cppflow::cast(te4, TF_UINT8, TF_FLOAT);
+	cppflow::tensor te5 = cppflow::tensor({ 1.0, 0.2, 0.0 });
+	te5 = cppflow::expand_dims(te5, 0);
+	te5 = cppflow::cast(te5, TF_UINT8, TF_FLOAT);
+	input = cppflow::draw_bounding_boxes_v2(input, te4, te5);
+	ofxTF2::tensorToImage(input, imgIn2);
+	imgIn2.update();
 #endif
 }
 
@@ -95,25 +107,26 @@ void ofApp::update() {
 		}
 		cppflow::tensor te1 = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
 		cppflow::tensor te2 = ofxTF2::vectorToTensor(maxElementVector);
-		cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10);
+		cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10, 0.5);
 		ofxTF2::tensorToVector(te3, rectangleIndex);
+		cppflow::tensor te4 = cppflow::gather(te1, te3, TF_FLOAT, TF_FLOAT);
+		te4 = cppflow::expand_dims(te4, 0);
+		te4 = cppflow::cast(te4, TF_UINT8, TF_FLOAT);
+		cppflow::tensor te5 = cppflow::tensor({ 1.0, 0.2, 0.0 });
+		te5 = cppflow::expand_dims(te5, 0);
+		te5 = cppflow::cast(te5, TF_UINT8, TF_FLOAT);
+		input = cppflow::draw_bounding_boxes_v2(input, te4, te5);
+		ofxTF2::tensorToImage(input, imgIn2);
+		imgIn2.update();
 	}
 #endif
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	ofSetColor(255);
-#ifdef USE_VIDEO
-	videoPlayer.draw(20, 20, 480, 360);
-#else
-	imgIn.draw(20, 20, 480, 360);
-#endif
-	ofSetColor(255, 0, 0);
+	imgIn2.draw(20, 20, 480, 360);
 	for (int i = 0; i < rectangleIndex.size(); i++) {
 		int index = rectangleIndex[i];
-		if(maxElementVector[index] >= 0.2)
-		ofDrawRectangle(boundings[index][1] * 480 + 20, boundings[index][0] * 360 + 20, boundings[index][3] * 480 - boundings[index][1] * 480, boundings[index][2] * 360 - boundings[index][0] * 360);
 		ofDrawBitmapStringHighlight("id: " + ofToString(cocoClasses[maxElementIndexVector[index]]) + ", prob: " + ofToString(maxElementVector[index]), boundings[index][1] * 480 + 30, boundings[index][0] * 360 + 40);
 	}
 }
