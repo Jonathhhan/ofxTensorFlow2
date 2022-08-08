@@ -55,16 +55,15 @@ void ofApp::setup() {
 void ofApp::update() {
 	videoPlayer.update();
 	if ((float)currentSubNo + currentSubLenght < sub.size() && sub[currentSubNo - 1. + currentSubLenght]->getEndTime() + ((sub[currentSubNo + currentSubLenght]->getStartTime() - sub[currentSubNo - 1. + currentSubLenght]->getEndTime()) / 2.) < videoPlayer.getPosition() * videoPlayer.getDuration() * 1000 ||  videoPlayer.getIsMovieDone()) {
-		cppflow::tensor cosine;
+		std::vector<float> cosine;
 		for (auto& element : vector_sub_copy) {
 			cppflow::tensor cosine_similarity = cppflow::sum(nextVector * std::get<0>(element), cppflow::tensor({ 1 }));
-			cosine_similarity = cppflow::cast(cosine_similarity, TF_INT32, TF_FLOAT);
-			cosine = cppflow::concat(1, { cosine, cosine_similarity });
-			cosine = cppflow::cast(cosine, TF_INT32, TF_FLOAT);
+			cosine.push_back(cosine_similarity.get_data<float>()[0]);
 		}
-		cppflow::tensor max = cppflow::arg_max(cosine, 0);
+		cppflow::tensor cosine_tensor = ofxTF2::vectorToTensor(cosine);
+		cppflow::tensor max = cppflow::arg_max(cosine_tensor, 0);
 		int maxElementIndex = max.get_data<int64_t>()[0];
-		float maxElement = cosine.get_data<float>()[maxElementIndex];
+		float maxElement = cosine[maxElementIndex];
 		currentSubNo = std::get<1>(vector_sub_copy[maxElementIndex]);
 		currentSubLenght = std::get<2>(vector_sub_copy[maxElementIndex]);
 		nextVector = std::get<3>(vector_sub_copy[maxElementIndex]);
@@ -96,16 +95,15 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	cppflow::tensor cosine;
+	std::vector<float> cosine;
 	for (auto& element : vector_sub_copy) {
 		cppflow::tensor cosine_similarity = cppflow::sum(nextVector * std::get<0>(element), cppflow::tensor({ 1 }));
-		cosine_similarity = cppflow::cast(cosine_similarity, TF_INT32, TF_FLOAT);
-		cosine = cppflow::concat(1, { cosine, cosine_similarity });
-		cosine = cppflow::cast(cosine, TF_INT32, TF_FLOAT);
+		cosine.push_back(cosine_similarity.get_data<float>()[0]);
 	}
-	cppflow::tensor max = cppflow::arg_max(cosine, 0);
+	cppflow::tensor cosine_tensor = ofxTF2::vectorToTensor(cosine);
+	cppflow::tensor max = cppflow::arg_max(cosine_tensor, 0);
 	int maxElementIndex = max.get_data<int64_t>()[0];
-	float maxElement = cosine.get_data<float>()[maxElementIndex];
+	float maxElement = cosine[maxElementIndex];
 	currentSubNo = std::get<1>(vector_sub_copy[maxElementIndex]);
 	currentSubLenght = std::get<2>(vector_sub_copy[maxElementIndex]);
 	nextVector = std::get<3>(vector_sub_copy[maxElementIndex]);
