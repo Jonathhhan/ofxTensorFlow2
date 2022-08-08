@@ -27,7 +27,7 @@ void ofApp::setup() {
 	max_element_vector.clear();
 	max_element_index_vector.clear();
 	boundings.clear();
-	imgIn.load("eisenstein.jpg");
+	imgIn.load("kite.jpg");
 	cppflow::tensor input = ofxTF2::imageToTensor(imgIn);
 	input = cppflow::expand_dims(input, 0);
 	input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
@@ -111,10 +111,19 @@ void ofApp::draw() {
 	imgIn.draw(20, 20, 480, 360);
 #endif
 
-	ofSetColor(255, 0, 0);
+	
 	for (int i = 0; i < rectangle_index.size(); i++) {
 		int index = rectangle_index[i];
 		if (max_element_vector[index] > 0.2) {
+			if (max_element_index_vector[index] == 0) {
+				ofSetColor(0, 0, 255);
+			}
+			else if (max_element_index_vector[index] == 2) {
+				ofSetColor(0, 255, 0);
+			}
+			else {
+				ofSetColor(255, 0, 0);
+			}
 			ofDrawRectangle(boundings[index][1] * 480 + 20, boundings[index][0] * 360 + 20, boundings[index][3] * 480 - boundings[index][1] * 480, boundings[index][2] * 360 - boundings[index][0] * 360);
 			ofDrawBitmapStringHighlight("id: " + cocoClasses[max_element_index_vector[index]] + ", prob: " + ofToString(max_element_vector[index]), boundings[index][1] * 480 + 30, boundings[index][0] * 360 + 40);
 		}
