@@ -9,9 +9,8 @@ void ofApp::setup() {
 	ofSetFrameRate(60);
 	ofSetVerticalSync(true);
 	ofSetWindowTitle("example_yolo_v4");
-	imgIn2.allocate(480, 360, OF_IMAGE_COLOR);
+	ofNoFill();
 	
-
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
 		ofLogError() << "failed to set GPU Memory options!";
 	}
@@ -25,49 +24,39 @@ void ofApp::setup() {
 	videoPlayer.load("Frenzy.mp4");
 	videoPlayer.play();
 #else
-	maxElementVector.clear();
-	maxElementIndexVector.clear();
+	max_element_vector.clear();
+	max_element_index_vector.clear();
 	boundings.clear();
-	rectangleIndex.clear();
 	imgIn.load("eisenstein.jpg");
-	input = ofxTF2::imageToTensor(imgIn);
+	cppflow::tensor input = ofxTF2::imageToTensor(imgIn);
 	input = cppflow::expand_dims(input, 0);
 	input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
 	input = cppflow::div(input, cppflow::tensor({ 255.f }));
-	input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 416, 416 }), true);
+	input = cppflow::resize_bicubic(input, cppflow::tensor({ 416, 416 }), true);
 
-	output = model.runModel(input_resized);
-	ofxTF2::tensorToVector(output, vec);
-	int rectangle_number = vec.size() / 84;
+	cppflow::tensor output = model.runModel(input);
+	std::vector<float> output_vector;
+	ofxTF2::tensorToVector(output, output_vector);
+	int rectangle_number = output_vector.size() / 84;
 	std::vector<float> bound;
 	for (int i = 0; i < rectangle_number; i++) {
-		first = vec.begin() + 84. * i;
-		last = vec.begin() + 84. * i + 4;
-		std::vector<float> newVec(first, last);
-		boundings.push_back(newVec);
-		bound.insert(bound.end(), newVec.begin(), newVec.end());
-		first = vec.begin() + 84. * i + 4;
-		last = vec.begin() + 84. * i + 84;
-		std::vector<float> newVecId(first, last);
-		int maxElementIndex = max_element(newVecId.begin(), newVecId.end()) - newVecId.begin();
-		float maxElement = newVecId[maxElementIndex];
-		maxElementIndexVector.push_back(maxElementIndex);
-		maxElementVector.push_back(maxElement);
+		first = output_vector.begin() + 84. * i;
+		last = output_vector.begin() + 84. * i + 4;
+		std::vector<float> new_vec(first, last);
+		boundings.push_back(new_vec);
+		bound.insert(bound.end(), new_vec.begin(), new_vec.end());
+		first = output_vector.begin() + 84. * i + 4;
+		last = output_vector.begin() + 84. * i + 84;
+		std::vector<float> new_vec_id(first, last);
+		int max_element_index = std::max_element(new_vec_id.begin(), new_vec_id.end()) - new_vec_id.begin();
+		float max_element = new_vec_id[max_element_index];
+		max_element_index_vector.push_back(max_element_index);
+		max_element_vector.push_back(max_element);
 	}
-	cppflow::tensor te1 = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
-	cppflow::tensor te2 = ofxTF2::vectorToTensor(maxElementVector);
-	cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10, 0.5);
-	ofxTF2::tensorToVector(te3, rectangleIndex);
-	cppflow::tensor te4 = cppflow::gather(te1, te3, TF_FLOAT, TF_FLOAT);
-	te4 = cppflow::expand_dims(te4, 0);
-	te4 = cppflow::cast(te4, TF_UINT8, TF_FLOAT);
-	cppflow::tensor te5 = cppflow::tensor({ 1.0, 0.2, 0.0 });
-	te5 = cppflow::expand_dims(te5, 0);
-	te5 = cppflow::cast(te5, TF_UINT8, TF_FLOAT);
-	input = cppflow::resize_bicubic(input, cppflow::tensor({ 360, 480 }), true);
-	input = cppflow::draw_bounding_boxes_v2(input, te4, te5);
-	ofxTF2::tensorToImage(input, imgIn2);
-	imgIn2.update();
+	cppflow::tensor rectangle_tensor = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
+	cppflow::tensor max_element_tensor = ofxTF2::vectorToTensor(max_element_vector);
+	cppflow::tensor rectangle_index_tensor = cppflow::non_max_suppression(rectangle_tensor, max_element_tensor, 10, 0.5);
+	ofxTF2::tensorToVector(rectangle_index_tensor, rectangle_index);
 #endif
 }
 
@@ -76,58 +65,59 @@ void ofApp::update() {
 #ifdef USE_VIDEO
 	videoPlayer.update();
 	if (videoPlayer.isFrameNew()) {
-		maxElementVector.clear();
-		maxElementIndexVector.clear();
+		max_element_vector.clear();
+		max_element_index_vector.clear();
 		boundings.clear();
-		rectangleIndex.clear();
-		input = ofxTF2::pixelsToTensor(videoPlayer.getPixels());
+		cppflow::tensor input = ofxTF2::pixelsToTensor(videoPlayer.getPixels());
 		input = cppflow::expand_dims(input, 0);
 		input = cppflow::cast(input, TF_UINT8, TF_FLOAT);
 		input = cppflow::div(input, cppflow::tensor({ 255.f }));
-		input_resized = cppflow::resize_bicubic(input, cppflow::tensor({ 416, 416 }), true);
+		input = cppflow::resize_bicubic(input, cppflow::tensor({ 416, 416 }), true);
 
-		output = model.runModel(input_resized);
-		ofxTF2::tensorToVector(output, vec);
-		int rectangle_number = vec.size() / 84;
+		cppflow::tensor output = model.runModel(input);
+		std::vector<float> output_vector;
+		ofxTF2::tensorToVector(output, output_vector);
+		int rectangle_number = output_vector.size() / 84;
 		std::vector<float> bound;
 		for (int i = 0; i < rectangle_number; i++) {
-			first = vec.begin() + 84. * i;
-			last = vec.begin() + 84. * i + 4;
-			std::vector<float> newVec(first, last);
-			boundings.push_back(newVec);
-			bound.insert(bound.end(), newVec.begin(), newVec.end());
-			first = vec.begin() + 84. * i + 4;
-			last = vec.begin() + 84. * i + 84;
-			std::vector<float> newVecId(first, last);
-			int maxElementIndex = max_element(newVecId.begin(), newVecId.end()) - newVecId.begin();
-			float maxElement = newVecId[maxElementIndex];
-			maxElementIndexVector.push_back(maxElementIndex);
-			maxElementVector.push_back(maxElement);
+			first = output_vector.begin() + 84. * i;
+			last = output_vector.begin() + 84. * i + 4;
+			std::vector<float> new_vec(first, last);
+			boundings.push_back(new_vec);
+			bound.insert(bound.end(), new_vec.begin(), new_vec.end());
+			first = output_vector.begin() + 84. * i + 4;
+			last = output_vector.begin() + 84. * i + 84;
+			std::vector<float> new_vec_id(first, last);
+			int max_element_index = std::max_element(new_vec_id.begin(), new_vec_id.end()) - new_vec_id.begin();
+			float max_element = new_vec_id[max_element_index];
+			max_element_index_vector.push_back(max_element_index);
+			max_element_vector.push_back(max_element);
 		}
-		cppflow::tensor te1 = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
-		cppflow::tensor te2 = ofxTF2::vectorToTensor(maxElementVector);
-		cppflow::tensor te3 = cppflow::non_max_suppression(te1, te2, 10, 0.5);
-		ofxTF2::tensorToVector(te3, rectangleIndex);
-		cppflow::tensor te4 = cppflow::gather(te1, te3, TF_FLOAT, TF_FLOAT);
-		te4 = cppflow::expand_dims(te4, 0);
-		te4 = cppflow::cast(te4, TF_UINT8, TF_FLOAT);
-		cppflow::tensor te5 = cppflow::tensor({ 1.0, 0.2, 0.0 });
-		te5 = cppflow::expand_dims(te5, 0);
-		te5 = cppflow::cast(te5, TF_UINT8, TF_FLOAT);
-		input = cppflow::resize_bicubic(input, cppflow::tensor({ 360, 480 }), true);
-		input = cppflow::draw_bounding_boxes_v2(input, te4, te5);
-		ofxTF2::tensorToImage(input, imgIn2);
-		imgIn2.update();
+		cppflow::tensor rectangle_tensor = ofxTF2::vectorToTensor(bound, ofxTF2::shapeVector{ rectangle_number, 4 });
+		cppflow::tensor max_element_tensor = ofxTF2::vectorToTensor(max_element_vector);
+		cppflow::tensor rectangle_index_tensor = cppflow::non_max_suppression(rectangle_tensor, max_element_tensor, 10, 0.5);
+		ofxTF2::tensorToVector(rectangle_index_tensor, rectangle_index);
 	}
 #endif
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	imgIn2.draw(20, 20, 480, 360);
-	for (int i = 0; i < rectangleIndex.size(); i++) {
-		int index = rectangleIndex[i];
-		ofDrawBitmapStringHighlight("id: " + ofToString(cocoClasses[maxElementIndexVector[index]]) + ", prob: " + ofToString(maxElementVector[index]), boundings[index][1] * 480 + 30, boundings[index][0] * 360 + 40);
+	ofSetColor(255);
+
+#ifdef USE_VIDEO
+	videoPlayer.draw(20, 20, 480, 360);
+#else
+	imgIn.draw(20, 20, 480, 360);
+#endif
+
+	ofSetColor(255, 0, 0);
+	for (int i = 0; i < rectangle_index.size(); i++) {
+		int index = rectangle_index[i];
+		if (max_element_vector[index] > 0.2) {
+			ofDrawRectangle(boundings[index][1] * 480 + 20, boundings[index][0] * 360 + 20, boundings[index][3] * 480 - boundings[index][1] * 480, boundings[index][2] * 360 - boundings[index][0] * 360);
+			ofDrawBitmapStringHighlight("id: " + cocoClasses[max_element_index_vector[index]] + ", prob: " + ofToString(max_element_vector[index]), boundings[index][1] * 480 + 30, boundings[index][0] * 360 + 40);
+		}
 	}
 }
 

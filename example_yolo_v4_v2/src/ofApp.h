@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
 
-#define USE_VIDEO
+// #define USE_VIDEO
 
 class ofApp : public ofBaseApp {
 
@@ -24,11 +24,7 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	std::vector<float> vec;
 	ofxTF2::Model model;
-	cppflow::tensor input;
-	cppflow::tensor input_resized;
-	cppflow::tensor output;
 
 #ifdef USE_VIDEO
 	ofVideoPlayer videoPlayer;
@@ -39,11 +35,8 @@ public:
 	std::vector<string> cocoClasses;
 	std::vector<float>::const_iterator first;
 	std::vector<float>::const_iterator last;
-
-	std::vector<float> maxElementVector;
-	std::vector<int> maxElementIndexVector;
+	std::vector<int> max_element_index_vector;
+	std::vector<float> max_element_vector;
 	std::vector<std::vector<float>> boundings;
-	std::vector<int> rectangleIndex;
-
-	ofFloatImage imgIn2;
+	std::vector<int> rectangle_index;
 };
