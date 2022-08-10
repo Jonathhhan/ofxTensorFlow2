@@ -28,15 +28,11 @@ class ofApp : public ofBaseApp {
 
 		int actualTime;
 		int sucessTime;
-		vector<float> vect;
 		cppflow::tensor t;
 
 		ofxMidiOut midiOut;
 		int channel;
-
 		unsigned int currentPgm;
-		int note, velocity;
-		int pan, bend, touch, polytouch;
 		int note_length;
 		int pitch;
 		std::default_random_engine generator;
