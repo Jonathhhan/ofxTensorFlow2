@@ -7,10 +7,8 @@ void ofApp::setup() {
 
 	midiOut.listOutPorts();
 	midiOut.openPort(0);
-	channel = 24;
-	currentPgm = 0;
-	note = 0;
-	velocity = 0;
+	channel = 1;
+	currentPgm = 46;
 	midiOut.sendProgramChange(channel, currentPgm);
 
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
@@ -39,12 +37,12 @@ void ofApp::update() {
 	if (actualTime > sucessTime) {	
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
 		t = cppflow::multinomial(output[1], 1);
-		pitch = t.get_data<int64_t>()[0];
+		pitch = t.get_data<int64_t>()[0] - 0;
 		cout << "pitch: " << ofToString(pitch) << endl;
 		cout << "step: " << ofToString(output[0].get_data<float>()) << endl;
 		cout << "duration: " << ofToString(output[2].get_data<float>()) << endl;
 		vect.erase(vect.begin(), vect.begin() + 3);
-		vect.push_back(pitch + 1);
+		vect.push_back(pitch);
 		vect.push_back(output[0].get_data<float>()[0]);
 		vect.push_back(output[2].get_data<float>()[0]);
 		t = ofxTF2::vectorToTensor(vect);
@@ -53,8 +51,8 @@ void ofApp::update() {
 		t = cppflow::div(t, { 128.f, 1.f, 1.f });
 		t = cppflow::cast(t, TF_INT32, TF_FLOAT);
 		midiOut.sendNoteOn(channel, pitch, 70);
-		sucessTime = actualTime + output[0].get_data<float>()[0] * 1000;
-		note_length = actualTime + output[2].get_data<float>()[0] * 5000;
+		sucessTime = actualTime + output[0].get_data<float>()[0] * 500;
+		note_length = actualTime + output[2].get_data<float>()[0] * 1000;
 	}
 	if (actualTime > note_length) {
 		midiOut.sendNoteOff(channel, pitch, 70);

@@ -28,6 +28,7 @@ class ofApp : public ofBaseApp {
 
 		int actualTime;
 		int sucessTime;
+		std::vector<float> vect;
 		cppflow::tensor t;
 
 		ofxMidiOut midiOut;
