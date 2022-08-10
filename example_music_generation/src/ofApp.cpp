@@ -6,7 +6,7 @@ void ofApp::setup() {
 	ofSetBackgroundColor(150, 200, 200);
 	sucessTime = 0;
 	note_length = 0;
-	
+
 	midiOut.listOutPorts();
 	midiOut.openPort(0);
 	channel = 1;
@@ -37,21 +37,23 @@ void ofApp::update() {
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
 		t = cppflow::multinomial(output[1], 1);
 		pitch = t.get_data<int64_t>()[0];
+		step = output[0].get_data<float>()[0];
+		duration = output[2].get_data<float>()[0];
 		cout << "pitch: " << ofToString(pitch) << endl;
-		cout << "step: " << ofToString(output[0].get_data<float>()) << endl;
-		cout << "duration: " << ofToString(output[2].get_data<float>()) << endl;
+		cout << "step: " << ofToString(step) << endl;
+		cout << "duration: " << ofToString(duration) << endl;
 		vect.erase(vect.begin(), vect.begin() + 3);
 		vect.push_back(pitch + 1);
-		vect.push_back(output[0].get_data<float>()[0]);
-		vect.push_back(output[2].get_data<float>()[0]);
+		vect.push_back(step);
+		vect.push_back(duration);
 		t = ofxTF2::vectorToTensor(vect);
 		t = cppflow::reshape(t, { 25, 3 }, TF_FLOAT);
 		t = cppflow::expand_dims(t, 0);
 		t = cppflow::div(t, { 128.f, 1.f, 1.f });
 		t = cppflow::cast(t, TF_INT32, TF_FLOAT);
 		midiOut.sendNoteOn(channel, pitch, 70);
-		sucessTime = actualTime + output[0].get_data<float>()[0] * 500;
-		note_length = actualTime + output[2].get_data<float>()[0] * 1000;
+		sucessTime = actualTime + step * 500;
+		note_length = actualTime + duration * 1000;
 	}
 	if (actualTime > note_length) {
 		midiOut.sendNoteOff(channel, pitch, 70);

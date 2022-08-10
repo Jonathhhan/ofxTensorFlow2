@@ -35,4 +35,6 @@ class ofApp : public ofBaseApp {
 		unsigned int currentPgm;
 		int note_length;
 		int pitch;
+		float step;
+		float duration;
 };
