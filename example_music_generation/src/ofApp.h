@@ -3,7 +3,6 @@
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
 #include "ofxMidi.h"
-#include <random>
 
 class ofApp : public ofBaseApp {
 
@@ -36,5 +35,4 @@ class ofApp : public ofBaseApp {
 		unsigned int currentPgm;
 		int note_length;
 		int pitch;
-		std::default_random_engine generator;
 };

@@ -37,7 +37,7 @@ void ofApp::update() {
 	if (actualTime > sucessTime) {	
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
 		t = cppflow::multinomial(output[1], 1);
-		pitch = t.get_data<int64_t>()[0] - 0;
+		pitch = t.get_data<int64_t>()[0];
 		cout << "pitch: " << ofToString(pitch) << endl;
 		cout << "step: " << ofToString(output[0].get_data<float>()) << endl;
 		cout << "duration: " << ofToString(output[2].get_data<float>()) << endl;
