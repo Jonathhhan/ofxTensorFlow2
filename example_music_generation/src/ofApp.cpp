@@ -43,7 +43,7 @@ void ofApp::update() {
 		cout << "step: " << ofToString(step) << endl;
 		cout << "duration: " << ofToString(duration) << endl;
 		vect.erase(vect.begin(), vect.begin() + 3);
-		vect.push_back(pitch + 1);
+		vect.push_back(pitch);
 		vect.push_back(step);
 		vect.push_back(duration);
 		t = ofxTF2::vectorToTensor(vect);
