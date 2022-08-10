@@ -49,7 +49,6 @@ void ofApp::setup() {
 void ofApp::update() {
 	actualTime = ofGetElapsedTimeMillis();
 	if (actualTime > sucessTime) {
-		
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
 		output[1] = cppflow::add(output[1], 128.f);
 		t = ofxTF2::vectorToTensor(vect);
