@@ -37,4 +37,7 @@ class ofApp : public ofBaseApp {
 		unsigned int currentPgm;
 		int note, velocity;
 		int pan, bend, touch, polytouch;
+		int note_length;
+		int pitch;
+		std::default_random_engine generator;
 };
