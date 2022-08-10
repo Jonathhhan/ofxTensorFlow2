@@ -5,23 +5,12 @@ void ofApp::setup() {
 	ofSetWindowTitle("example_music_generation");
 	ofSetBackgroundColor(150, 200, 200);
 
-	// print the available output ports to the console
 	midiOut.listOutPorts();
-
-	// connect
-	midiOut.openPort(0); // by number
-	//midiOut.openPort("IAC Driver Pure Data In"); // by name
-	//midiOut.openVirtualPort("ofxMidiOut"); // open a virtual port
-
+	midiOut.openPort(0);
 	channel = 1;
 	currentPgm = 46;
 	note = 0;
 	velocity = 0;
-	pan = 0;
-	bend = 0;
-	touch = 0;
-	polytouch = 0;
-
 	midiOut.sendProgramChange(channel, currentPgm);
 
 	if (!ofxTF2::setGPUMaxMemory(ofxTF2::GPU_PERCENT_70, true)) {
