@@ -4,7 +4,9 @@
 void ofApp::setup() {
 	ofSetWindowTitle("example_music_generation");
 	ofSetBackgroundColor(150, 200, 200);
-
+	sucessTime = 0;
+	note_length = 0;
+	
 	midiOut.listOutPorts();
 	midiOut.openPort(0);
 	channel = 1;
@@ -26,9 +28,6 @@ void ofApp::setup() {
 	t = cppflow::expand_dims(t, 0);
 	t = cppflow::div(t, { 128.f, 1.f, 1.f });
 	t = cppflow::cast(t, TF_INT32, TF_FLOAT);
-	
-	sucessTime = 0;
-	note_length = 0;
 }
 
 //--------------------------------------------------------------
