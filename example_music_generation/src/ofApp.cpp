@@ -35,8 +35,6 @@ void ofApp::setup() {
 	model.setup({ "serving_default_input_1" }, { "StatefulPartitionedCall:0", "StatefulPartitionedCall:1", "StatefulPartitionedCall:2" });
 	vect = { 88, 0.5, 0.5, 55, 0.5, 0.5, 60, 0.5, 0.5, 50, 0.5, 0.5, 60, 0.5, 0.5, 38, 0.5, 0.5, 55, 0.5, 0.5, 60, 0.5, 0.5, 50, 0.5, 0.5, 60, 0.5, 0.5, 38, 0.5, 0.5, 55, 0.5, 0.5, 60, 0.5, 0.5, 50, 0.5, 0.5, 60, 0.5, 0.5, 38, 0.5, 0.5, 55, 0.5, 0.5, 60, 0.5, 0.5, 50, 0.5, 0.5, 60, 0.5, 0.5, 38, 0.5, 0.5, 55, 0.5, 0.5, 60, 0.5, 0.5, 50, 0.5, 0.5, 60, 0.5, 0.5 };
 	t = ofxTF2::vectorToTensor(vect);
-	
-	cout << ofToString(t.shape()) << endl;
 	t = cppflow::reshape(t, { 25, 3 }, TF_FLOAT);
 	t = cppflow::expand_dims(t, 0);
 	t = cppflow::div(t, { 128.f, 1.f, 1.f });
