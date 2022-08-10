@@ -37,7 +37,6 @@ void ofApp::update() {
 	actualTime = ofGetElapsedTimeMillis();
 	if (actualTime > sucessTime) {
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
-		output[1] = cppflow::add(output[1], 128.f);
 		t = ofxTF2::vectorToTensor(vect);
 		std::discrete_distribution<> d(vect.begin(), vect.end());
 		std::random_device rd;
@@ -56,9 +55,6 @@ void ofApp::update() {
 		t = cppflow::cast(t, TF_INT32, TF_FLOAT);
 		midiOut.sendNoteOn(channel, abc, 70);
 		sucessTime = actualTime + output[2].get_data<float>()[0] * 1000;
-		// print out both the midi note and the frequency
-		ofLogNotice() << "note: " << abc
-			<< " freq: " << ofxMidi::mtof(abc) << " Hz";
 	}
 }
 
