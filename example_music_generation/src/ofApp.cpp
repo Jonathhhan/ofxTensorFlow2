@@ -21,7 +21,7 @@ void ofApp::setup() {
 		std::exit(EXIT_FAILURE);
 	}
 
-	model.setup({ "serving_default_input_1" }, { "StatefulPartitionedCall:0", "StatefulPartitionedCall:1", "StatefulPartitionedCall:2" });
+	model.setup({ "serving_default_input_1" }, { "StatefulPartitionedCall:1", "StatefulPartitionedCall:0", "StatefulPartitionedCall:2" });
 	vect = { 88, 1.5, 3.5, 55, 0.5, 2.5, 60, 0.5, 2.5, 50, 3.5, 5.5, 60, 0.5, 1.5, 38, 1.5, 4.5, 55, 0.5, 7.5, 60, 1.5, 5.5, 50, 2.5, 3.5, 60, 3.5, 0.5, 38, 0.5, 0.5, 55, 0.5, 0.5, 60, 0.5, 0.5, 50, 0.5, 0.5, 60, 0.5, 0.5, 38, 0.5, 0.5, 55, 0.5, 6.5, 60, 0.5, 6.5, 50, 0.5, 3.5, 60, 0.5, 8.5, 38, 0.5, 4.5, 55, 0.5, 5.5, 60, 1.5, 3.5, 50, 1.5, 7.5, 60, 3.5, 4.5 };
 	t = ofxTF2::vectorToTensor(vect);
 	t = cppflow::reshape(t, { 25, 3 }, TF_FLOAT);
@@ -35,9 +35,9 @@ void ofApp::update() {
 	actualTime = ofGetElapsedTimeMillis();
 	if (actualTime > sucessTime) {	
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
-		t = cppflow::multinomial(output[1], 1);
+		t = cppflow::multinomial(output[0], 1);
 		pitch = t.get_data<int64_t>()[0];
-		step = output[0].get_data<float>()[0];
+		step = output[1].get_data<float>()[0];
 		duration = output[2].get_data<float>()[0];
 		cout << "pitch: " << ofToString(pitch) << endl;
 		cout << "step: " << ofToString(step) << endl;
