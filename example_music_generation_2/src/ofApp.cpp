@@ -59,7 +59,7 @@ void ofApp::update() {
 		t = cppflow::cast(t, TF_INT32, TF_FLOAT);
 		midiOut.sendNoteOn(channel, pitch, velocity);
 		sucessTime = actualTime + step * 500;
-		note_length = actualTime + duration * 1000;
+		note_length = actualTime + duration * 500;
 	}
 	if (actualTime > note_length) {
 		midiOut.sendNoteOff(channel, pitch, velocity);
