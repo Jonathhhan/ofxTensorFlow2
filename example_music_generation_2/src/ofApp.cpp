@@ -43,10 +43,10 @@ void ofApp::update() {
 		pitch = t.get_data<int64_t>()[0];
 		t = cppflow::multinomial(output[1], 1, random, random);
 		velocity = t.get_data<int64_t>()[0];
-		t = cppflow::reshape(output[2], { 1 });
+		t = cppflow::reshape(output[2], 1);
 		t = cppflow::maximum(t, (float)0);
 		step = t.get_data<float>()[0];
-		t = cppflow::reshape(output[3], { 1 });
+		t = cppflow::reshape(output[3], 1);
 		t = cppflow::maximum(t, (float)0);
 		duration = t.get_data<float>()[0];
 		cout << "pitch: " << ofToString(pitch) << endl;
