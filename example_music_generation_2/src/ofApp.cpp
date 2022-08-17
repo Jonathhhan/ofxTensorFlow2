@@ -22,8 +22,8 @@ void ofApp::setup() {
 	}
 	model.printOperations();
 
-	model.setup({ "serving_default_input_4" }, { "StatefulPartitionedCall:1", "StatefulPartitionedCall:3", "StatefulPartitionedCall:2", "StatefulPartitionedCall:0" });
-	vect = { 88, 60, 1.5, 3.5, 55, 70, 0.5, 2.5, 60, 60, 0.5, 2.5, 50, 60, 3.5, 5.5, 40, 60, 0.5, 1.5, 38, 40, 1.5, 4.5, 55, 60, 0.5, 7.5, 60, 40, 1.5, 5.5, 50, 60, 2.5, 3.5, 60, 60, 3.5, 0.5, 38, 70, 0.5, 0.5, 55, 60, 0.5, 0.5, 60, 65, 0.5, 0.5, 50, 70, 0.5, 0.5, 60, 80, 0.5, 0.5, 38, 60, 0.5, 0.5, 55, 60, 0.5, 6.5, 60, 60, 0.5, 6.5, 50, 60, 0.5, 3.5, 60, 60, 0.5, 8.5, 38, 60, 0.5, 4.5, 55, 60, 0.5, 5.5, 60, 60, 1.5, 3.5, 50, 65, 1.5, 7.5, 60, 70, 3.5, 4.5 };
+	model.setup({ "serving_default_input_1" }, { "StatefulPartitionedCall:0", "StatefulPartitionedCall:1", "StatefulPartitionedCall:2", "StatefulPartitionedCall:3" });
+	vect = { 88, 60, 0.5, 3.5, 55, 70, 0.5, 2.5, 60, 60, 0.5, 2.5, 50, 60, 0.5, 5.5, 40, 60, 0.5, 1.5, 38, 40, 0.5, 4.5, 55, 60, 0.5, 0.5, 60, 40, 0.5, 1.5, 50, 60, 0.5, 3.5, 60, 60, 0.5, 0.5, 38, 70, 0.5, 0.5, 55, 60, 0.5, 0.5, 60, 65, 0.2, 0.5, 50, 70, 0.5, 0.5, 60, 80, 0.5, 0.5, 38, 60, 0.5, 0.5, 55, 60, 0.3, 1.5, 60, 60, 0.5, 0.5, 50, 60, 0.5, 0.7, 60, 60, 0.2, 0.5, 38, 60, 0.2, 0.6, 55, 60, 0.2, 1.5, 60, 60, 0.3, 0.5, 50, 65, 0.5, 0.5, 60, 70, 0.5, 1.5 };
 	cout << ofToString(vect.size()) << endl;
 	t = ofxTF2::vectorToTensor(vect);
 	t = cppflow::reshape(t, { 25, 4 }, TF_FLOAT);
@@ -35,14 +35,18 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
 	actualTime = ofGetElapsedTimeMillis();
-	if (actualTime > sucessTime) {	
+	if (actualTime > sucessTime) {
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
 		t = cppflow::multinomial(output[0], 1);
 		pitch = t.get_data<int64_t>()[0];
 		t = cppflow::multinomial(output[1], 1);
 		velocity = t.get_data<int64_t>()[0];
-		step = output[2].get_data<float>()[0];
-		duration = output[3].get_data<float>()[0];
+		t = cppflow::reshape(output[2], { 1 });
+		t = cppflow::maximum(t, (float)0);
+		step = t.get_data<float>()[0];
+		t = cppflow::reshape(output[3], { 1 });
+		t = cppflow::maximum(t, (float)0);
+		duration = t.get_data<float>()[0];
 		cout << "pitch: " << ofToString(pitch) << endl;
 		cout << "velocity: " << ofToString(velocity) << endl;
 		cout << "step: " << ofToString(step) << endl;
@@ -58,12 +62,17 @@ void ofApp::update() {
 		t = cppflow::div(t, { 128.f, 128.f, 1.f, 1.f });
 		t = cppflow::cast(t, TF_INT32, TF_FLOAT);
 		midiOut.sendNoteOn(channel, pitch, velocity);
-		sucessTime = actualTime + step * 500;
-		note_length = actualTime + duration * 500;
+		sucessTime = actualTime + step * 1000;
+		note_length = actualTime + duration * 1000;
+		noteOffVector.push_back(pitch);
+		noteOffVector.push_back(velocity);
+		noteOffVector.push_back(note_length);
 	}
-	if (actualTime > note_length) {
-		midiOut.sendNoteOff(channel, pitch, velocity);
-	}
+	for (int x = 0; x < noteOffVector.size() / 3; x += 3)
+		if (actualTime > noteOffVector[x + 2.]) {
+			midiOut.sendNoteOff(channel, noteOffVector[x], noteOffVector[x + 1.]);
+			noteOffVector.erase(noteOffVector.begin() + x, noteOffVector.begin() + x + 3);
+		}
 }
 
 //--------------------------------------------------------------
