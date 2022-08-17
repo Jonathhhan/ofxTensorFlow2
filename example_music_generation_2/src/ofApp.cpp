@@ -6,6 +6,7 @@ void ofApp::setup() {
 	ofSetBackgroundColor(150, 200, 200);
 	sucessTime = 0;
 	note_length = 0;
+	ofSeedRandom();
 
 	midiOut.listOutPorts();
 	midiOut.openPort(0);
@@ -37,9 +38,9 @@ void ofApp::update() {
 	actualTime = ofGetElapsedTimeMillis();
 	if (actualTime > sucessTime) {
 		vector <cppflow::tensor> output = model.runMultiModel({ t });
-		t = cppflow::multinomial(output[0], 1);
+		t = cppflow::multinomial(output[0], 1, ofRandom(1000000), ofRandom(1000000));
 		pitch = t.get_data<int64_t>()[0];
-		t = cppflow::multinomial(output[1], 1);
+		t = cppflow::multinomial(output[1], 1, ofRandom(1000000), ofRandom(1000000));
 		velocity = t.get_data<int64_t>()[0];
 		t = cppflow::reshape(output[2], { 1 });
 		t = cppflow::maximum(t, (float)0);
