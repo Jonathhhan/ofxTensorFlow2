@@ -38,4 +38,5 @@ class ofApp : public ofBaseApp {
 		float step;
 		float duration;
 		float velocity;
+		int random;
 };
