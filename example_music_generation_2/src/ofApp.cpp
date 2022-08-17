@@ -70,11 +70,12 @@ void ofApp::update() {
 		noteOffVector.push_back(velocity);
 		noteOffVector.push_back(note_length);
 	}
-	for (int x = 0; x < noteOffVector.size() / 3; x += 3)
+	for (int x = 0; x < noteOffVector.size() / 3; x += 3) {
 		if (actualTime > noteOffVector[x + 2.]) {
 			midiOut.sendNoteOff(channel, noteOffVector[x], noteOffVector[x + 1.]);
 			noteOffVector.erase(noteOffVector.begin() + x, noteOffVector.begin() + x + 3);
 		}
+	}
 }
 
 //--------------------------------------------------------------
