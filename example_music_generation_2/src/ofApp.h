@@ -29,7 +29,7 @@ class ofApp : public ofBaseApp {
 		int sucessTime;
 		std::vector<float> vect;
 		cppflow::tensor t;
-
+		std::vector<float> noteOffVector;
 		ofxMidiOut midiOut;
 		int channel;
 		unsigned int currentPgm;
