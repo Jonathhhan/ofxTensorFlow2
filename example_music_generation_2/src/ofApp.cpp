@@ -30,6 +30,7 @@ void ofApp::setup() {
 	t = cppflow::expand_dims(t, 0);
 	t = cppflow::div(t, { 128.f, 128.f, 1.f, 1.f });
 	t = cppflow::cast(t, TF_INT32, TF_FLOAT);
+	model.runMultiModel({ t });
 }
 
 //--------------------------------------------------------------
