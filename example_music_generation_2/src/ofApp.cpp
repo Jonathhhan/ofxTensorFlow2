@@ -72,8 +72,14 @@ void ofApp::update() {
 	}
 	for (int x = 0; x < noteOffVector.size() / 3; x += 3) {
 		if (actualTime > noteOffVector[x + 2.]) {
-			midiOut.sendNoteOff(channel, noteOffVector[x], noteOffVector[x + 1.]);
-			noteOffVector.erase(noteOffVector.begin() + x, noteOffVector.begin() + x + 3);
+			if (pitch == noteOffVector[x]) {
+				noteOffVector.erase(noteOffVector.begin() + x + 2);
+				noteOffVector.emplace(noteOffVector.begin() + x + 2, note_length);
+			}
+			else {
+				midiOut.sendNoteOff(channel, noteOffVector[x], noteOffVector[x + 1.]);
+				noteOffVector.erase(noteOffVector.begin() + x, noteOffVector.begin() + x + 3);
+			}
 		}
 	}
 }
