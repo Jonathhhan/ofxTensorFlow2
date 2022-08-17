@@ -6,7 +6,6 @@ void ofApp::setup() {
 	ofSetBackgroundColor(150, 200, 200);
 	sucessTime = 0;
 	note_length = 0;
-	ofSeedRandom();
 
 	midiOut.listOutPorts();
 	midiOut.openPort(0);
