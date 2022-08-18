@@ -5,6 +5,9 @@ tokenizers::SubwordTextEncoder textEncoder("data/tokenizer.tf");
 //--------------------------------------------------------------
 void ofApp::setup() {
 	std::vector<std::string> dialogue;
+	cppflow::tensor output_tensor;
+	std::vector<double> output_vector_1;
+	std::vector<double> output_vector_2;
 	int counter = -1;
 
 	ofSetWindowTitle("example_universal_sentence_encoder");
@@ -35,9 +38,11 @@ void ofApp::setup() {
 		if (element->getDialogue().back() == '.' || element->getDialogue().back() == '?' || element->getDialogue().back() == '!' || element->getDialogue().back() == '"' || element->getDialogue().back() == '\'' || element->getDialogue().back() == ';') {
 			std::string currentDialogue = ofJoinString(dialogue, " ");
 			dialogue.clear();
-			cppflow::tensor output_1 = model.runModel(cppflow::reshape(cppflow::tensor(currentDialogue), { -1 }));
-			cppflow::tensor output_2 = model.runModel(cppflow::reshape(cppflow::tensor(chatbot(currentDialogue)), { -1 }));
-			vector_sub.push_back(std::make_tuple(output_1, element->getSubNo() - counter, counter, output_2));
+			output_tensor = model.runModel(cppflow::reshape(cppflow::tensor(currentDialogue), { -1 }));
+			ofxTF2::tensorToVector(output_tensor, output_vector_1);
+			output_tensor = model.runModel(cppflow::reshape(cppflow::tensor(chatbot(currentDialogue)), { -1 }));
+			ofxTF2::tensorToVector(output_tensor, output_vector_2);
+			vector_sub.push_back(std::make_tuple(output_vector_1, element->getSubNo() - counter, counter, output_vector_2));
 			counter = -1;
 		}
 		counter++;
@@ -55,13 +60,16 @@ void ofApp::setup() {
 void ofApp::update() {
 	videoPlayer.update();
 	if ((float)currentSubNo + currentSubLenght < sub.size() && sub[currentSubNo - 1. + currentSubLenght]->getEndTime() + ((sub[currentSubNo + currentSubLenght]->getStartTime() - sub[currentSubNo - 1. + currentSubLenght]->getEndTime()) / 2.) < videoPlayer.getPosition() * videoPlayer.getDuration() * 1000 ||  videoPlayer.getIsMovieDone()) {
-		std::vector<float> cosine;
-		for (auto& element : vector_sub_copy) {
-			cppflow::tensor cosine_similarity = cppflow::sum(nextVector * std::get<0>(element), cppflow::tensor({ 1 }));
-			cosine.push_back(cosine_similarity.get_data<float>()[0]);
+		std::vector<double> cosine;
+		for (int x = 0; x < vector_sub_copy.size(); x++) {
+			double cosine_similarity = 0;
+			for (int i = 0; i < std::get<0>(vector_sub_copy[x]).size(); i++) {
+				cosine_similarity += nextVector[i] * std::get<0>(vector_sub_copy[x])[i];
+			}
+			cosine.push_back(cosine_similarity);
 		}
 		int maxElementIndex = std::max_element(cosine.begin(), cosine.end()) - cosine.begin();
-		float maxElement = cosine[maxElementIndex];
+		double maxElement = *std::max_element(cosine.begin(), cosine.end());
 		currentSubNo = std::get<1>(vector_sub_copy[maxElementIndex]);
 		currentSubLenght = std::get<2>(vector_sub_copy[maxElementIndex]);
 		nextVector = std::get<3>(vector_sub_copy[maxElementIndex]);
@@ -93,13 +101,16 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-	std::vector<float> cosine;
-	for (auto& element : vector_sub_copy) {
-		cppflow::tensor cosine_similarity = cppflow::sum(nextVector * std::get<0>(element), cppflow::tensor({ 1 }));
-		cosine.push_back(cosine_similarity.get_data<float>()[0]);
+	std::vector<double> cosine;
+	for (int x = 0; x < vector_sub_copy.size(); x++) {
+		double cosine_similarity = 0;
+		for (int i = 0; i < std::get<0>(vector_sub_copy[x]).size(); i++) {
+			cosine_similarity += nextVector[i] * std::get<0>(vector_sub_copy[x])[i];
+		}
+		cosine.push_back(cosine_similarity);
 	}
 	int maxElementIndex = std::max_element(cosine.begin(), cosine.end()) - cosine.begin();
-	float maxElement = cosine[maxElementIndex];
+	double maxElement = *std::max_element(cosine.begin(), cosine.end());
 	currentSubNo = std::get<1>(vector_sub_copy[maxElementIndex]);
 	currentSubLenght = std::get<2>(vector_sub_copy[maxElementIndex]);
 	nextVector = std::get<3>(vector_sub_copy[maxElementIndex]);
