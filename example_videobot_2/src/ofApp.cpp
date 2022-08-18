@@ -61,8 +61,9 @@ void ofApp::update() {
 	videoPlayer.update();
 	if ((float)currentSubNo + currentSubLenght < sub.size() && sub[currentSubNo - 1. + currentSubLenght]->getEndTime() + ((sub[currentSubNo + currentSubLenght]->getStartTime() - sub[currentSubNo - 1. + currentSubLenght]->getEndTime()) / 2.) < videoPlayer.getPosition() * videoPlayer.getDuration() * 1000 ||  videoPlayer.getIsMovieDone()) {
 		std::vector<double> cosine;
+		double cosine_similarity;
 		for (int x = 0; x < vector_sub_copy.size(); x++) {
-			double cosine_similarity = 0;
+			cosine_similarity = 0;
 			for (int i = 0; i < std::get<0>(vector_sub_copy[x]).size(); i++) {
 				cosine_similarity += nextVector[i] * std::get<0>(vector_sub_copy[x])[i];
 			}
@@ -102,8 +103,9 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	std::vector<double> cosine;
+	double cosine_similarity;
 	for (int x = 0; x < vector_sub_copy.size(); x++) {
-		double cosine_similarity = 0;
+		cosine_similarity = 0;
 		for (int i = 0; i < std::get<0>(vector_sub_copy[x]).size(); i++) {
 			cosine_similarity += nextVector[i] * std::get<0>(vector_sub_copy[x])[i];
 		}
