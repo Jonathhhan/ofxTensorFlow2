@@ -14,15 +14,15 @@ WARRANTIES, see the file, "LICENSE.txt," in this distribution.
 
 Selected examples:
 
-| Style Transfer | Keyword Spotting | CharRnn (Frozen Graph) |
+| [Style Transfer regular](example_style_transfer) & [arbitrary](example_style_transfer_arbitrary) | [Object Recognition](example_yolo_v4) | [CharRnn (Frozen Graph)](example_basics_frozen_graph) |
 | :--: | :--: | :--: |
-| ![](media/style_transfer.gif) | ![](media/keyword_spotting.gif) |  ![](media/charRnn.gif) | 
+| ![](media/style_transfer.gif) | ![](media/yolo.gif) |  ![](media/charRnn.gif) | 
 
-| Pose Estimation | Pix2Pix | 
-| :--: | :--: | 
-| ![](media/movenet.gif) | ![](media/pix2pix.gif) | 
+| [Pose Estimation](example_movenet) | [Pix2Pix](example_pix2pix) | [Keyword Spotting](example_keyword_spotting) |
+| :--: | :--: | :--: |
+| ![](media/movenet.gif) | ![](media/pix2pix.gif) | ![](media/keyword_spotting.gif)  |
 
-| Video Matting |
+| [Video Matting](example_video_matting) |
 | :--: |
 | ![](media/video_matting.gif) | 
 
@@ -104,25 +104,30 @@ cd ofxTensorFlow2
 git submodule update --init --recursive
 ```
 
-Next, download the pre-built [TensorFlow2 C library](https://www.tensorflow.org/install/lang_c) and extract the following folders to their destination:
+Next, download the pre-built [TensorFlow2 C library](https://www.tensorflow.org/install/lang_c) and extract the following folders to their destination. The lib files (.so, .dylib, .dll) **must** be placed within a subdirectory matching your system and/or build environment (osx, linux64, msys2, vs):
 
 ~~~
 include/ --> libs/tensorflow/include
 lib/ --> libs/tensorflow/lib/[osx/linux64/msys2/vs]
 ~~~
 
+*Note: If the libs are placed **elsewhere**, the OF ProjectGenerator will not find them and you will have linker errors when building. The naming is specified by openFrameworks.*
+
 To make this quick, you can use a script which automates the download:
 
 ```shell
 ./scripts/download_tensorflow.sh
 ```
+
+By default, the script will try to auto-detect the system architecture. For example, on an Apple Silicon macOS system, the script will download builds for "arm64" while an Intel machine will use "x86_64".
+
 When opting for GPU support set the `TYPE` script variable:
 
 ```shell 
 TYPE=gpu ./scripts/download_tensorflow.sh
 ```
 
-Additionally, to use a specific version supply it as the first argument:
+Additionally, to use a specific version, supply it as the first argument:
 
 ```shell
 ./scripts/download_tensorflow.sh 2.7.0
@@ -150,6 +155,12 @@ This step can also be automated by additional makefile targets provided by the `
 include $(OF_ROOT)/addons/ofxTensorFlow2/addon_targets.mk
 ```
 
+Additionally, this include can be added to an existing project by running the `configure_makefile.sh` script with the [ath to the project directory as an argument:
+
+```shell
+scripts/configure_makefile.sh example_yolo_v4
+```
+
 This adds two additional targets, one for Debug and the other for Release, which run the application after exporting the `LD_LIBRARY_PATH`. For example, to run a debug version of the application:
 
     make RunDebugTF2
@@ -168,13 +179,15 @@ To use libtensorflow installed to a system path, ie. by your system's package ma
 
 1. If libtensorflow was downloaded to `libs/tensorflow/`, remove all files in this folder
 2. Edit `addon_config.mk` under the "linux64" build target: comment the "local path" sections
-3. If using the OF Project Generator, (re)regenerate project files for projects using the addon
+3. If using the OF ProjectGenerator, (re)regenerate project files for projects using the addon
 
 _Note: When using libtensorflow installed to the system, the `LD_LIBRARY_PATH` export is not needed._
 
 ### macOS
 
-The cppflow library requires C++14 which needs to be enabled when building on macOS.
+The cppflow library requires C++14 (minimum) or C++17 which needs to be enabled when building on macOS.
+
+_Note: As of summer 2022, C++17 support is only available for the development version of openFrameworks. If you are using a release version and have build issues, try C++14 instead._
 
 libtensorflow is provided as pre-compiled dynamic libraries. On macOS these `.dylib` files need to be configured and copied into the build macOS .app. These steps are automated via the `scripts/macos_install_libs.sh` script and can be invoked when building, either by Xcode or the Makefiles.
 
@@ -182,25 +195,44 @@ Alternatively, you can use libtensorflow compiled and installed to the system, i
 
 #### Xcode build
 
-Enable C++14 features by changing the `CLANG_CXX_LANGUAGE_STANDARD` define in `OF_ROOT/libs/openFrameworksCompiled/project/osx/CoreOF.xcconfig`, for example:
+Enable C++14 or C++17 features by changing the `CLANG_CXX_LANGUAGE_STANDARD` define in `OF_ROOT/libs/openFrameworksCompiled/project/osx/CoreOF.xcconfig`, for example:
 
-```makefile
-CLANG_CXX_LANGUAGE_STANDARD[arch=x86_64] = c++14
+```
+CLANG_CXX_LANGUAGE_STANDARD = c++14
 ```
 
-After generating project files using the OF Project Generator, add the following to one of the Run Script build phases in the Xcode project to invoke the `macos_install_libs.sh` script:
+After generating project files using the OF ProjectGenerator, add the following to one of the Run Script build phases in the Xcode project to invoke the `macos_install_libs.sh` script, either via the `configure_xcode.sh` script or manually.
 
+Script method: close the project in Xcode if it's open, then run `configure_xcode.sh` with the path to the project directory as argument:
+
+```shell
+scripts/configure_xcode.sh example_yolo_v4
+```
+
+Manual method:
 1. Select the project in the left-hand Xcode project tree
 2. Select the project build target under TARGETS
 3. Under the Build Phases tab, find the 2nd Run Script, and add the following before the final `echo` line:
 
 ```shell
-$OF_PATH/addons/ofxTensorFlow2/scripts/macos_install_libs.sh "$TARGET_BUILD_DIR/$PRODUCT_NAME.app";
+"$OF_PATH"/addons/ofxTensorFlow2/scripts/macos_install_libs.sh "$TARGET_BUILD_DIR/$PRODUCT_NAME.app";
 ```
+
+_Note: Whenever the project files are (re)generated, either method will need to be reapplied._
+
+By default, Xcode *Debug* builds are for the current system architecture only. Build and run should work fine. *Release* builds, however, are "universal" and will build for *all* supported architectures, ie. "arm64" and "x86_64". This will cause linker errors since the libtensorflow builds used with this addon are generally single-architecture only.
+
+To disable building for a specific architecture, it can be added to a list of "Excluded Architectures" within Xcode:
+
+1. Select the project in the left-hand Xcode project tree
+2. Select the project build target under TARGETS
+3. Under the Build Settings tab, find Exclude Architectures, double click on the second column, and add:
+  * on an Apple Silicon system: x86_64
+  * on an Intel system: arm64
 
 #### Makefile build
 
-Enable C++14 features by changing `-std=c++11` to `-std=c++14` on line 142 in `OF_ROOT/libs/openFrameworksCompiled/project/osx/config.osx.default.mk`:
+Enable C++14 or C++17 features by changing `-std=c++11` to `-std=c++14` or `-std=c++17` on line 142 in `OF_ROOT/libs/openFrameworksCompiled/project/osx/config.osx.default.mk`:
 
 ```makefile
 PLATFORM_CXXFLAGS += -std=c++14
@@ -211,6 +243,12 @@ When building an application using the makefiles, an additional step is required
 ```makefile
 # ofxTensorFlow2
 include $(OF_ROOT)/addons/ofxTensorFlow2/addon_targets.mk
+```
+
+Additionally, this include can be added to an existing project by running the `configure_makefile.sh` script with the [ath to the project directory as an argument:
+
+```shell
+scripts/configure_makefile.sh example_yolo_v4
 ```
 
 This adds two additional targets, one for Debug and the other for Release, which call the script to install the .dylibs. For example, to build a debug version of the application *and* install the libs, simply run:
@@ -234,7 +272,34 @@ To use libtensorflow installed to a system path, ie. from a package manager like
 2. Edit `addon_config.mk` under the "osx" build target:
   * comment the "local path" sections and uncomment the "system path" sections
   * If needed, change the path for your system, ie. `/usr/local` to `/usr/opt` etc
-3. If using the OF Project Generator, (re)regenerate project files for projects using the addon
+3. If using the OF ProjectGenerator, (re)regenerate project files for projects using the addon
+
+### Windows
+
+In order to use the helper scripts, it is recommended to install the Msys2 distribution which provides both a Unix command shell and MinGW. Download the Msys2 "x86_64" 64 bit installer from: http://www.msys2.org/
+
+In a Msys2 command shell, next install the `curl` and `unzip` commands:
+
+```shell
+pacman -S curl unzip
+```
+
+Now the `scripts/download_tensorflow.sh` and `scripts/example_models.sh` can be invoked.
+
+#### CUDA
+
+_The following steps were provided by Jonathan Frank Spring 2022 and were tested with Visual Studio 2022, CUDA 11.7, cuDNN 8.4.1.50, and libtensorflow 2.8.0. Help us expand this section as the main devs use Linux and macOS._
+
+For best performance, it is suggested to install Nvidia CUDA for hardware acceleration.
+
+1. Download and install Nvidia CUDA (non-server) https://developer.nvidia.com/cuda-downloads
+2. Download and install Nvidia cuDNN (CUDA Deep Neural Network), requires dev program membership https://developer.nvidia.com/cudnn
+3. Add the following to `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v##.#\bin`
+  * The contents of `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDNN\v#.#.#.#\bin`
+  * `zlibwapi.dll` downloaded from http://www.winimage.com/zLibDll/zlib123dllx64.zip
+4. Install libtensorflow2 _with **GPU** acceleration_ using either manually or via the `scripts/download_tensorflow.sh`
+
+_Note: the cuDNN version seems to rely on specific CUDA and libtensorflow versions. Check the libtensorflow [tested build configurations chart](https://www.tensorflow.org/install/source_windows#tested_build_configurations)._
 
 Running the Example Projects
 ----------------------------
@@ -421,9 +486,21 @@ If you find any bugs or suggestions please log them to GitHub as well.
 Known Issues
 ------------
 
+### TF_* architecture linker errors on macOS
+
+The default OF-generated Xcode project will try to build for both arm64 and x86_64 in *Release*, so you may see linker errors such as:
+
+~~~
+Ignoring file ../../../addons/ofxTensorFlow2/libs/tensorflow/lib/osx/libtensorflow.2.4.0.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+...
+"_TFE_ContextOptionsSetConfig", referenced from:
+~~~
+
+To make the build succeed, you can exclude the arm64 architecture in Xcode so the project.See the info in the the "macOS / Xcode build" subsection under the "Installation and Build" section.
+
 ### dyld: Library not loaded: @rpath/libtensorflow.2.dylib
 
-On macOS, the libtensorflow dynamic libraries (dylibs) need to be copied into the .app bundle. This error indicates the library loader cannot find the dylibs when the app starts and the build process is missing a step. Please check the "macOS" subsection under the "Installation & Build" section.
+On macOS, the libtensorflow dynamic libraries (dylibs) need to be copied into the .app bundle. This error indicates the library loader cannot find the dylibs when the app starts and the build process is missing a step. Please check the "macOS" subsection under the "Installation and Build" section.
 
 ### EXC_BAD_INSTRUCTION Crash on macOS
 

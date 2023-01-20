@@ -1,45 +1,43 @@
+/*
+ * Example made with love by Jonathan Frank 2022
+ * https://github.com/Jonathhhan
+ * Updated by members of the ZKM | Hertz-Lab 2022
+ */
 #pragma once
 
 #include "ofMain.h"
 #include "ofxTensorFlow2.h"
-#include "nms.hpp"
+#include "ofxYolo.h"
 
-// #define USE_VIDEO
+// uncomment this to use a video file, otherwise we'll use an image
+#define USE_MOVIE
 
 class ofApp : public ofBaseApp {
 
-public:
-	void setup();
-	void update();
-	void draw();
+	public:
+		void setup();
+		void update();
+		void draw();
 
-	void keyPressed(int key);
-	void keyReleased(int key);
-	void mouseMoved(int x, int y);
-	void mouseDragged(int x, int y, int button);
-	void mousePressed(int x, int y, int button);
-	void mouseReleased(int x, int y, int button);
-	void mouseEntered(int x, int y);
-	void mouseExited(int x, int y);
-	void windowResized(int w, int h);
-	void dragEvent(ofDragInfo dragInfo);
-	void gotMessage(ofMessage msg);
+		void keyPressed(int key);
+		void keyReleased(int key);
+		void mouseMoved(int x, int y);
+		void mouseDragged(int x, int y, int button);
+		void mousePressed(int x, int y, int button);
+		void mouseReleased(int x, int y, int button);
+		void mouseEntered(int x, int y);
+		void mouseExited(int x, int y);
+		void windowResized(int w, int h);
+		void dragEvent(ofDragInfo dragInfo);
+		void gotMessage(ofMessage msg);
 
-	std::vector<float> vec;
-	ofxTF2::Model model;
-	cppflow::tensor input;
-	cppflow::tensor input_resized;
-	cppflow::tensor output;
+		// yolo model
+		ofxYolo yolo;
 
-#ifdef USE_VIDEO
-	ofVideoPlayer videoPlayer;
-#else
-	ofImage imgIn;
-#endif
-
-	std::vector<string> cocoClasses;
-	std::vector<std::pair<std::vector<float>, int>> rectangles;
-	std::vector<float>::const_iterator first;
-	std::vector<float>::const_iterator last;
-	std::vector<std::pair<int, float>> id;
+		// input source
+	#ifdef USE_MOVIE
+		ofVideoPlayer video;
+	#else
+		ofImage imgIn;
+	#endif
 };
